@@ -96,26 +96,26 @@ public:
 		if (n != 1) cb(n, 1);
 	}
 	
-	static size_t fill_primes(num_type primes[], size_t primes_size, num_type max_num) {
-		if (primes_size == 0 || max_num < 2) return 0;
-		primes[0] = 2;
-		size_t idx = 1;
+	static void fill_primes(primes_array_type &primes_array, size_t primes_size, num_type max_num) {
+		primes_array.count = 0;
+		if (primes_size == 0 || max_num < 2) return;
+		primes_array.primes[0] = 2;
+		++primes_array.count;
 		num_type n = 3;
 		num_type n_sqrt = 1;
-		while (idx < primes_size && n <= max_num) {
+		while (primes_array.count < primes_size && n <= max_num) {
 			bool is_prime = true;
-			for (size_t i=0; primes[i]<=n_sqrt; ++i) {
-				if (!(n % primes[i])) {
+			for (size_t i=0; primes_array.primes[i]<=n_sqrt; ++i) {
+				if (!(n % primes_array.primes[i])) {
 					is_prime = false;
 					break;
 				}
 			}
-			assert(idx < primes_size);
-			if (is_prime) primes[idx++] = n;
+			assert(primes_array.count < primes_size);
+			if (is_prime) primes_array.primes[primes_array.count++] = n;
 			n += 2;
 			n_sqrt = round_sqrt(n);
 		}
-		return idx;
 	}
 };
 

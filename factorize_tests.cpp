@@ -135,21 +135,22 @@ size_t my_fill_primes(uint_fast64_t primes[], size_t primes_size, uint_fast64_t 
 void test_fill_primes() {
 	typedef Factorizer<uint_fast64_t> fzr_type;
 	fzr_type::num_type primes[1024];
+	fzr_type::primes_array_type primes_array(primes, 0);
 	uint_fast64_t myprimes[1024];
-	size_t count, mycount;
+	size_t mycount;
 	
-	count = fzr_type::fill_primes(primes, 1024, UINT64_MAX);
-	assert(count == 1024);
+	fzr_type::fill_primes(primes_array, 1024, UINT64_MAX);
+	assert(primes_array.count == 1024);
 	mycount = my_fill_primes(myprimes, 1024, UINT64_MAX);
 	assert(mycount == 1024);
-	for (size_t i=0; i<1024; ++i) assert(primes[i] == myprimes[i]);
+	for (size_t i=0; i<1024; ++i) assert(primes_array.primes[i] == myprimes[i]);
 	
-	for (size_t i=0; i<1024; ++i) primes[i] = myprimes[i] = 0;
+	for (size_t i=0; i<1024; ++i) primes_array.primes[i] = myprimes[i] = 0;
 	const uint_fast64_t p_max = 8147;
-	count = fzr_type::fill_primes(primes, 1024, p_max);
+	fzr_type::fill_primes(primes_array, 1024, p_max);
 	mycount = my_fill_primes(myprimes, 1024, p_max);
-	assert(count == mycount);
-	for (size_t i=0; i<count; ++i) assert(primes[i] == myprimes[i]);
+	assert(primes_array.count == mycount);
+	for (size_t i=0; i<primes_array.count; ++i) assert(primes_array.primes[i] == myprimes[i]);
 }
 
 void tests_suite() {
