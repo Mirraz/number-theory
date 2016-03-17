@@ -89,8 +89,8 @@ public:
 				p = primes_array.primes[idx];
 				++idx;
 			} else {
-				if (p == 2) p += 1;
-				else p += 2;
+				if (p != 2) p += 2;
+				else ++p;
 			}
 		}
 		if (n != 1) cb(n, 1);
