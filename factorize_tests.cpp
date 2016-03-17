@@ -75,36 +75,41 @@ void test_factorize() {
 	}
 }
 
-// sum of two squares theorem
-// one of summands can be 0 i.e. if n is square itself then function returns true
-typedef uint_fast64_t square_summands_num_type;
-bool check_2_square_summands(square_summands_num_type n) {
+bool my_is_sum_of_two_squares(uint_fast64_t n) {
 	if (n <= 1) return true;
-	typedef Factorizer<square_summands_num_type> fzr_type;
-	bool result = true;
-	fzr_type::factorize_cb_type cb = [&result] (fzr_type::num_type prime, fzr_type::exp_type exp) -> bool {
-		if ((prime & 3) == 3 && (exp & 1)) {
-			result = false;
-			return true;
+	uint_fast64_t n_sqrt = floor(sqrt((double)n));
+	while (!(n & 1)) n >>= 1;
+	for (uint_fast64_t p=3; p<=n_sqrt; ++p) {
+		if (n % p) continue;
+		if ((p & 3) == 3) {
+			uint_fast8_t p_pow = 0;
+			do {
+				n /= p;
+				++p_pow;
+			} while (!(n % p));
+			if (p_pow & 1) return false;
 		} else {
-			return false;
+			do {n /= p;} while (!(n % p));
 		}
-	};
-	fzr_type factorizer(NULL, 0, cb);
-	factorizer.factorize(n);
-	return result;
+		n_sqrt = floor(sqrt((double)n));
+	}
+	if (n != 1 && (n & 3) == 3) return false;
+	return true;
 }
 
-void test_check_2_square_summands() {
-	for (square_summands_num_type i=0; i<1024*4+1; ++i) {
-		printf("%" PRIuFAST64 "\t%s\n", i, check_2_square_summands(i) ? "true" : "false");
+void test_is_sum_of_two_squares() {
+	typedef Factorizer<uint_fast64_t> fzr_type;
+	for (fzr_type::num_type i=0; i<1024*4+1; ++i) {
+		bool my_res = my_is_sum_of_two_squares(i);
+		bool res = fzr_type::is_sum_of_two_squares(NULL, 0, i);
+		assert(my_res == res);
 	}
 }
 
 void tests_suite() {
-	test_round_sqrt();
-	test_factorize();
-	//test_check_2_square_summands();
+	//test_round_sqrt();
+	//test_factorize();
+	test_is_sum_of_two_squares();
 }
 
 int main() {

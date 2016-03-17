@@ -82,5 +82,25 @@ public:
 		}
 		if (n != 1) cb(n, 1);
 	}
+	
+	// Theorem:
+	//     A number n is a sum of two squares if and only if all prime factors of n
+	//     of the form 4m+3 have even exponent in the prime factorization of n.
+	// if n is a square then function returns true (it means one summand is 0)
+	static bool is_sum_of_two_squares(num_type *primes, size_t primes_count, num_type n) {
+		if (n <= 1) return true;
+		bool result = true;
+		factorize_cb_type cb = [&result] (num_type prime, exp_type exp) -> bool {
+			if ((prime & 3) == 3 && (exp & 1)) {
+				result = false;
+				return true;
+			} else {
+				return false;
+			}
+		};
+		Factorizer factorizer(primes, primes_count, cb);
+		factorizer.factorize(n);
+		return result;
+	}
 };
 
