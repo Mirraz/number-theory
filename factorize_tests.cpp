@@ -97,19 +97,20 @@ bool my_is_sum_of_two_squares(uint_fast64_t n) {
 	return true;
 }
 
-void test_is_sum_of_two_squares() {
-	typedef Factorizer<uint_fast64_t> fzr_type;
-	for (fzr_type::num_type i=0; i<1024*4+1; ++i) {
+void test_sum_of_two_squares() {
+	typedef SumOfTwoSquaresChecker<uint_fast64_t> checker_type;
+	checker_type checker(NULL, 0);
+	for (checker_type::num_type i=0; i<1024*4+1; ++i) {
 		bool my_res = my_is_sum_of_two_squares(i);
-		bool res = fzr_type::is_sum_of_two_squares(NULL, 0, i);
+		bool res = checker.is_sum_of_two_squares(i);
 		assert(my_res == res);
 	}
 }
 
 void tests_suite() {
-	//test_round_sqrt();
-	//test_factorize();
-	test_is_sum_of_two_squares();
+	test_round_sqrt();
+	test_factorize();
+	test_sum_of_two_squares();
 }
 
 int main() {

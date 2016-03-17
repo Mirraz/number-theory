@@ -82,23 +82,51 @@ public:
 		}
 		if (n != 1) cb(n, 1);
 	}
+};
+
+template <typename NUM_TYPE>
+class SumOfTwoSquaresChecker {
+public:
+	typedef NUM_TYPE num_type;
 	
+private:
+	typedef Factorizer<num_type> factorizer_type;
+	
+private:
+	factorizer_type factorizer;
+	bool result;
+	
+public:
+	SumOfTwoSquaresChecker(num_type *b_primes, size_t b_primes_count) :
+		factorizer(
+			b_primes,
+			b_primes_count,
+			std::bind(
+				&SumOfTwoSquaresChecker::factorize_cb,
+				this,
+				std::placeholders::_1,
+				std::placeholders::_2
+			)
+		) {}
+	
+private:
 	// Theorem:
 	//     A number n is a sum of two squares if and only if all prime factors of n
 	//     of the form 4m+3 have even exponent in the prime factorization of n.
+	bool factorize_cb(typename factorizer_type::num_type prime, typename factorizer_type::exp_type exp) {
+		if ((prime & 3) == 3 && (exp & 1)) {
+			result = false;
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+public:
 	// if n is a square then function returns true (it means one summand is 0)
-	static bool is_sum_of_two_squares(num_type *primes, size_t primes_count, num_type n) {
+	bool is_sum_of_two_squares(num_type n) {
 		if (n <= 1) return true;
-		bool result = true;
-		factorize_cb_type cb = [&result] (num_type prime, exp_type exp) -> bool {
-			if ((prime & 3) == 3 && (exp & 1)) {
-				result = false;
-				return true;
-			} else {
-				return false;
-			}
-		};
-		Factorizer factorizer(primes, primes_count, cb);
+		result = true;
 		factorizer.factorize(n);
 		return result;
 	}
