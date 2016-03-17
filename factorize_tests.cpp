@@ -3,6 +3,7 @@
 #include <stdlib.h>		// NULL
 #include <stdint.h>
 #include <inttypes.h>
+#include <math.h>
 #include "factorize.h"
 
 //void test_round_sqrt() {
@@ -10,28 +11,67 @@
 //	fzn_type::test_round_sqrt();
 //}
 
+struct MyPow {
+	uint_fast64_t prime;
+	uint_fast8_t exp;
+};
+
+struct MyFactors {
+	uint_fast8_t pow_count;
+	MyPow pows[16];
+};
+
+MyFactors my_factorize(uint_fast64_t n) {
+	assert(n > 0);
+	MyFactors factors;
+	factors.pow_count = 0;
+	if (n == 1) return factors;
+	uint_fast64_t n_sqrt = round(sqrt(n));
+	for (uint_fast64_t d=2; d<=n_sqrt; d+=2) {
+		if (n % d == 0) {
+			uint_fast8_t exp = 0;
+			do {
+				n /= d;
+				++exp;
+			} while (n % d == 0);
+			assert(factors.pow_count < 16);
+			factors.pows[factors.pow_count].prime = d;
+			factors.pows[factors.pow_count].exp = exp;
+			++factors.pow_count;
+			n_sqrt = round(sqrt(n));
+		}
+		if (d == 2) --d;
+	}
+	if (n > 1) {
+		assert(factors.pow_count == 0 || factors.pows[factors.pow_count-1].prime != n);
+		factors.pows[factors.pow_count].prime = n;
+		factors.pows[factors.pow_count].exp = 1;
+		++factors.pow_count;
+	}
+	return factors;
+}
+
 void test_factorize() {
 	typedef Factorization<uint_fast64_t> fzn_type;
 	
-	bool cb_was_called;
-	bool is_prime;
-	fzn_type::factorize_cb_type cb = [&cb_was_called, &is_prime] (fzn_type::num_type prime, fzn_type::exp_type exp) -> bool {
-		if (cb_was_called) is_prime = false;
-		else if (exp > 1) is_prime = false;
-		cb_was_called = true;
-		printf("%" PRIuFAST64 "^%" PRIuFAST8 " ", prime, exp);
+	MyFactors factors;
+	fzn_type::factorize_cb_type cb = [&factors] (fzn_type::num_type prime, fzn_type::exp_type exp) -> bool {
+		factors.pows[factors.pow_count].prime = prime;
+		factors.pows[factors.pow_count].exp = exp;
+		++factors.pow_count;
 		return false;
 	};
 	fzn_type::Factorizer factorizer(NULL, 0, cb);
 	
-	for (fzn_type::num_type i=1; i<=1024*4+1; ++i) {
-	//for (fzn_type::num_type i=UINT64_MAX; i>=UINT64_MAX-64; --i) {
-		printf("%" PRIuFAST64 " = ", i);
-		cb_was_called = false;
-		is_prime = true;
+	for (fzn_type::num_type i=1; i<=1024*256+1; ++i) {
+		factors.pow_count = 0;
 		factorizer.factorize(i);
-		if (is_prime) printf("\t\tPRIME");
-		printf("\n");
+		MyFactors my_factors = my_factorize(i);
+		assert(factors.pow_count == my_factors.pow_count);
+		for (uint_fast8_t i=0; i<factors.pow_count; ++i) {
+			assert(factors.pows[i].prime == my_factors.pows[i].prime);
+			assert(factors.pows[i].exp == my_factors.pows[i].exp);
+		}
 	}
 }
 
@@ -63,8 +103,8 @@ void test_check_2_square_summands() {
 
 void tests_suite() {
 	//test_round_sqrt();
-	//test_factorize();
-	test_check_2_square_summands();
+	test_factorize();
+	//test_check_2_square_summands();
 }
 
 int main() {
