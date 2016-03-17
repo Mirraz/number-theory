@@ -6,10 +6,10 @@
 #include <math.h>
 #include "factorize.h"
 
-//void test_round_sqrt() {
-//	typedef Factorization<uint_fast64_t> fzn_type;
-//	fzn_type::test_round_sqrt();
-//}
+void test_round_sqrt() {
+	typedef Factorizer<uint_fast64_t> fzr_type;
+	fzr_type::test_round_sqrt();
+}
 
 struct MyPow {
 	uint_fast64_t prime;
@@ -52,18 +52,18 @@ MyFactors my_factorize(uint_fast64_t n) {
 }
 
 void test_factorize() {
-	typedef Factorization<uint_fast64_t> fzn_type;
+	typedef Factorizer<uint_fast64_t> fzr_type;
 	
 	MyFactors factors;
-	fzn_type::factorize_cb_type cb = [&factors] (fzn_type::num_type prime, fzn_type::exp_type exp) -> bool {
+	fzr_type::factorize_cb_type cb = [&factors] (fzr_type::num_type prime, fzr_type::exp_type exp) -> bool {
 		factors.pows[factors.pow_count].prime = prime;
 		factors.pows[factors.pow_count].exp = exp;
 		++factors.pow_count;
 		return false;
 	};
-	fzn_type::Factorizer factorizer(NULL, 0, cb);
+	fzr_type factorizer(NULL, 0, cb);
 	
-	for (fzn_type::num_type i=1; i<=1024*256+1; ++i) {
+	for (fzr_type::num_type i=1; i<=1024*256+1; ++i) {
 		factors.pow_count = 0;
 		factorizer.factorize(i);
 		MyFactors my_factors = my_factorize(i);
@@ -80,9 +80,9 @@ void test_factorize() {
 typedef uint_fast64_t square_summands_num_type;
 bool check_2_square_summands(square_summands_num_type n) {
 	if (n <= 1) return true;
-	typedef Factorization<square_summands_num_type> fzn_type;
+	typedef Factorizer<square_summands_num_type> fzr_type;
 	bool result = true;
-	fzn_type::factorize_cb_type cb = [&result] (fzn_type::num_type prime, fzn_type::exp_type exp) -> bool {
+	fzr_type::factorize_cb_type cb = [&result] (fzr_type::num_type prime, fzr_type::exp_type exp) -> bool {
 		if ((prime & 3) == 3 && (exp & 1)) {
 			result = false;
 			return true;
@@ -90,7 +90,7 @@ bool check_2_square_summands(square_summands_num_type n) {
 			return false;
 		}
 	};
-	fzn_type::Factorizer factorizer(NULL, 0, cb);
+	fzr_type factorizer(NULL, 0, cb);
 	factorizer.factorize(n);
 	return result;
 }
@@ -102,7 +102,7 @@ void test_check_2_square_summands() {
 }
 
 void tests_suite() {
-	//test_round_sqrt();
+	test_round_sqrt();
 	test_factorize();
 	//test_check_2_square_summands();
 }
