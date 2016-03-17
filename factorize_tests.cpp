@@ -64,7 +64,7 @@ void test_factorize() {
 	};
 	fzr_type factorizer(primes, cb);
 	
-	for (fzr_type::num_type i=1; i<=1024*256+1; ++i) {
+	for (fzr_type::num_type i=1; i<=1024*64+1; ++i) {
 		factors.pow_count = 0;
 		factorizer.factorize(i);
 		MyFactors my_factors = my_factorize(i);
@@ -153,11 +153,40 @@ void test_fill_primes() {
 	for (size_t i=0; i<primes_array.count; ++i) assert(primes_array.primes[i] == myprimes[i]);
 }
 
+void test_factorize_with_primes_array() {
+	typedef Factorizer<uint_fast64_t> fzr_type;
+	
+	fzr_type::num_type primes[65536];
+	fzr_type::primes_array_type primes_array(primes, 0);
+	fzr_type::fill_primes(primes_array, 65536, UINT64_MAX);
+	
+	MyFactors factors;
+	fzr_type::factorize_cb_type cb = [&factors] (fzr_type::num_type prime, fzr_type::exp_type exp) -> bool {
+		factors.pows[factors.pow_count].prime = prime;
+		factors.pows[factors.pow_count].exp = exp;
+		++factors.pow_count;
+		return false;
+	};
+	fzr_type factorizer(primes_array, cb);
+	
+	for (fzr_type::num_type i=1; i<=1024*64+1; ++i) {
+		factors.pow_count = 0;
+		factorizer.factorize(i);
+		MyFactors my_factors = my_factorize(i);
+		assert(factors.pow_count == my_factors.pow_count);
+		for (uint_fast8_t i=0; i<factors.pow_count; ++i) {
+			assert(factors.pows[i].prime == my_factors.pows[i].prime);
+			assert(factors.pows[i].exp == my_factors.pows[i].exp);
+		}
+	}
+}
+
 void tests_suite() {
 	//test_round_sqrt();
 	//test_factorize();
 	//test_sum_of_two_squares();
-	test_fill_primes();
+	//test_fill_primes();
+	test_factorize_with_primes_array();
 }
 
 int main() {
