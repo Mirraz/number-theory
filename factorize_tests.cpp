@@ -53,6 +53,7 @@ MyFactors my_factorize(uint_fast64_t n) {
 
 void test_factorize() {
 	typedef Factorizer<uint_fast64_t> fzr_type;
+	fzr_type::primes_array_type primes;
 	
 	MyFactors factors;
 	fzr_type::factorize_cb_type cb = [&factors] (fzr_type::num_type prime, fzr_type::exp_type exp) -> bool {
@@ -61,7 +62,7 @@ void test_factorize() {
 		++factors.pow_count;
 		return false;
 	};
-	fzr_type factorizer(NULL, 0, cb);
+	fzr_type factorizer(primes, cb);
 	
 	for (fzr_type::num_type i=1; i<=1024*256+1; ++i) {
 		factors.pow_count = 0;
@@ -99,7 +100,8 @@ bool my_is_sum_of_two_squares(uint_fast64_t n) {
 
 void test_sum_of_two_squares() {
 	typedef SumOfTwoSquaresChecker<uint_fast64_t> checker_type;
-	checker_type checker(NULL, 0);
+	checker_type::primes_array_type primes;
+	checker_type checker(primes);
 	for (checker_type::num_type i=0; i<1024*4+1; ++i) {
 		bool my_res = my_is_sum_of_two_squares(i);
 		bool res = checker.is_sum_of_two_squares(i);

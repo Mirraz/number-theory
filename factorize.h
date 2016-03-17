@@ -5,21 +5,34 @@
 #include <functional>
 
 template <typename NUM_TYPE>
+struct PrimesArray {
+public:
+	typedef NUM_TYPE num_type;
+
+	num_type *primes;
+	size_t count;
+	
+	PrimesArray() : primes(NULL), count(0) {}
+	
+	PrimesArray(num_type *b_primes, size_t b_count) : primes(b_primes), count(b_count) {}
+};
+
+template <typename NUM_TYPE>
 class Factorizer {
 public:
 	typedef NUM_TYPE num_type;
+	typedef PrimesArray<num_type> primes_array_type;
 	static_assert(sizeof(num_type) <= 32, "Too big num_type for exp_type");
 	typedef uint_fast8_t exp_type;
 	typedef std::function<bool(num_type prime, exp_type exp)> factorize_cb_type;
 	
 private:
-	num_type *primes;
-	size_t primes_count;
+	primes_array_type &primes_array;
 	factorize_cb_type cb;
 	
 public:
-	Factorizer(num_type *b_primes, size_t b_primes_count, factorize_cb_type b_cb) :
-		primes(b_primes), primes_count(b_primes_count), cb(b_cb) {}
+	Factorizer(primes_array_type &b_primes_array, factorize_cb_type b_cb) :
+		primes_array(b_primes_array), cb(b_cb) {}
 	
 private:
 	static_assert(sizeof(num_type) <= 8, "Too big num_type for round_sqrt");
@@ -59,7 +72,7 @@ public:
 	// if cb returns true, factorize interrupts
 	void factorize(num_type n) const {
 		assert(n > 0);
-		num_type p = (primes_count == 0 ? 2 : primes[0]);
+		num_type p = (primes_array.count == 0 ? 2 : primes_array.primes[0]);
 		size_t idx = 1;
 		num_type n_sqrt = round_sqrt(n);
 		 while (p <= n_sqrt) {
@@ -72,8 +85,8 @@ public:
 				if (cb(p, exp)) break;
 				n_sqrt = round_sqrt(n);
 			}
-			if (idx < primes_count) {
-				p = primes[idx];
+			if (idx < primes_array.count) {
+				p = primes_array.primes[idx];
 				++idx;
 			} else {
 				if (p == 2) p += 1;
@@ -88,6 +101,7 @@ template <typename NUM_TYPE>
 class SumOfTwoSquaresChecker {
 public:
 	typedef NUM_TYPE num_type;
+	typedef PrimesArray<num_type> primes_array_type;
 	
 private:
 	typedef Factorizer<num_type> factorizer_type;
@@ -97,10 +111,9 @@ private:
 	bool result;
 	
 public:
-	SumOfTwoSquaresChecker(num_type *b_primes, size_t b_primes_count) :
+	SumOfTwoSquaresChecker(primes_array_type &b_primes_array) :
 		factorizer(
-			b_primes,
-			b_primes_count,
+			b_primes_array,
 			std::bind(
 				&SumOfTwoSquaresChecker::factorize_cb,
 				this,
