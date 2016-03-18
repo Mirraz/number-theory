@@ -70,13 +70,7 @@ public:
 			}
 			if (d == 2) --d;
 		}
-		if (n > 1) {
-			if (pows[pow_count-1].prime == n) {
-				++pows[pow_count-1].exp;
-			} else {
-				pows[pow_count++] = PrimePow(n, 1);
-			}
-		}
+		if (n > 1) pows[pow_count++] = PrimePow(n, 1);
 	}
 	
 	num_type value() const {
