@@ -26,6 +26,9 @@ public:
 	typedef uint_fast8_t pow_count_type;
 	static_assert(MAX_POW_COUNT > 0, "MAX_POW_COUNT can't be zero");
 	
+	typedef Factorizer<num_type> factorizer_type;
+	typedef typename factorizer_type::primes_array_type primes_array_type;
+	
 	struct PrimePow {
 		num_type prime;
 		exp_type exp;
@@ -34,41 +37,52 @@ public:
 		PrimePow(num_type b_prime, exp_type b_exp) : prime(b_prime), exp(b_exp) {}
 		PrimePow(const PrimePow &b) : prime(b.prime), exp(b.exp) {}
 	};
-	typedef PrimePow prime_pow_type;
-	
-	typedef Factorizer<num_type> factorizer_type;
-	typedef typename factorizer_type::primes_array_type primes_array_type;
 	
 private:
+	primes_array_type primes_array;
+	factorizer_type factorizer;
 	pow_count_type pow_count;
 	PrimePow pows[MAX_POW_COUNT];
 	
-public:
-	CanonicFactors() : pow_count(0) {}
+	bool factorize_cb(typename factorizer_type::num_type prime, typename factorizer_type::exp_type exp) {
+		assert(pow_count < MAX_POW_COUNT);
+		pows[pow_count++] = PrimePow(prime, exp);
+		return false;
+	}
 	
-	CanonicFactors(const CanonicFactors &b) {
+public:
+	CanonicFactors(primes_array_type b_primes_array) :
+		primes_array(b_primes_array),
+		factorizer(
+			b_primes_array,
+			std::bind(
+				&CanonicFactors::factorize_cb,
+				this,
+				std::placeholders::_1,
+				std::placeholders::_2
+			)
+		),
+		pow_count(0) {}
+	
+	CanonicFactors(const CanonicFactors &b) : CanonicFactors(b.primes_array) {
 		pow_count = b.pow_count;
 		for (pow_count_type i=0; i<b.pow_count; ++i) pows[i] = b.pows[i];
 	}
 	
-	CanonicFactors(const PrimePow &b) {
+	CanonicFactors(primes_array_type b_primes_array, const PrimePow &b) : CanonicFactors(b_primes_array) {
 		pow_count = 1;
 		pows[0] = b;
 	}
 	
-	CanonicFactors(primes_array_type b_primes_array, num_type n) {
+	CanonicFactors(primes_array_type b_primes_array, num_type n) : CanonicFactors(b_primes_array) {
 		pow_count = 0;
-		typename factorizer_type::factorize_cb_type cb =
-				[this] (typename factorizer_type::num_type prime, typename factorizer_type::exp_type exp) -> bool {
-			assert(pow_count < MAX_POW_COUNT);
-			pows[pow_count++] = PrimePow(prime, exp);
-			return false;
-		};
-		factorizer_type factorizer(b_primes_array, cb);
 		factorizer.factorize(n);
 	}
 	
-	CanonicFactors(num_type n) : CanonicFactors(primes_array_type(), n) {}
+	void assign(num_type n) {
+		pow_count = 0;
+		factorizer.factorize(n);
+	}
 	
 	num_type value() const {
 		num_type n = 1;
@@ -108,9 +122,15 @@ public:
 	}
 #endif
 	
+private:
+	static primes_array_type max_primes_array(const primes_array_type &a, const primes_array_type &b) {
+		if (a.count < b.count) return b;
+		return a;
+	}
+	
 	// TODO maybe more optimal mul_assign_static
 	static CanonicFactors mul_static(const CanonicFactors &a, const CanonicFactors &b) {
-		CanonicFactors result;
+		CanonicFactors result(max_primes_array(a.primes_array, b.primes_array));
 		result.pow_count = 0;
 		pow_count_type i = 0, j = 0;
 		while (i < a.pow_count || j < b.pow_count) {
@@ -135,12 +155,13 @@ public:
 		return result;
 	}
 	
+public:
 	CanonicFactors operator*(const CanonicFactors &b) const {
 		return mul_static(*this, b);
 	}
 	
 	CanonicFactors operator*(num_type b) const {
-		return (*this) * CanonicFactors(b);
+		return (*this) * CanonicFactors(primes_array, b);
 	}
 	
 	CanonicFactors& operator *=(const CanonicFactors &b) {
@@ -150,11 +171,12 @@ public:
 	}
 	
 	CanonicFactors& operator *=(num_type b) {
-		return (*this) *= CanonicFactors(b);
+		return (*this) *= CanonicFactors(primes_array, b);
 	}
 	
-	// maybe result === a, but it will be not efficient
-	static void mul_pow_static(CanonicFactors &result, const CanonicFactors &a, const PrimePow &b) {
+private:
+	static CanonicFactors mul_pow_static(const CanonicFactors &a, const PrimePow &b) {
+		CanonicFactors result(max_primes_array(a.max_primes_array, b.max_primes_array));
 		pow_count_type i;
 		for (i=0; i<a.pow_count && a.pows[i].prime < b.prime; ++i) {
 			result.pows[i] = a.pows[i];
@@ -193,10 +215,9 @@ public:
 		}
 	}
 	
+public:
 	CanonicFactors mul_pow(const PrimePow &b) const {
-		CanonicFactors result;
-		mul_pow_static(result, *this, b);
-		return result;
+		return mul_pow_static(*this, b);
 	}
 	
 	void mul_pow_assign(const PrimePow &b) {
@@ -212,7 +233,7 @@ private:
 	
 public:
 	static CanonicFactors lcm(const CanonicFactors &a, const CanonicFactors &b) {
-		CanonicFactors result;
+		CanonicFactors result(max_primes_array(a.primes_array, b.primes_array));
 		result.pow_count = 0;
 		pow_count_type i = 0, j = 0;
 		while (i < a.pow_count || j < b.pow_count) {
@@ -238,30 +259,31 @@ public:
 	}
 	
 	static CanonicFactors eulers_phi(const CanonicFactors &b) {
-		CanonicFactors result = 1;
+		CanonicFactors result(b.primes_array);
 		for (pow_count_type i=0; i<b.pow_count; ++i) {
-			result *= CanonicFactors(b.pows[i].prime - 1);
+			result *= b.pows[i].prime - 1;
 			if (b.pows[i].exp > 1) result.mul_pow_assign(PrimePow(b.pows[i].prime, b.pows[i].exp - 1));
 		}
 		return result;
 	}
 	
-	static CanonicFactors eulers_phi_pow(const PrimePow &b) {
-		CanonicFactors result = CanonicFactors(b.prime - 1);
+private:
+	static CanonicFactors eulers_phi_pow(primes_array_type primes_array, const PrimePow &b) {
+		CanonicFactors result(primes_array, b.prime - 1);
 		if (b.exp > 1) result.mul_pow_assign(PrimePow(b.prime, b.exp - 1));
 		return result;
 	}
 	
+public:
 	static CanonicFactors carmichael(const CanonicFactors &b) {
-		if (b.pow_count == 0) return 1;
-		CanonicFactors result;
-		if (b.pows[0].prime == 2 && b.pows[0].exp > 2) {
-			result = PrimePow(2, b.pows[0].exp - 2);
-		} else {
-			result = eulers_phi_pow(b.pows[0]);
-		}
+		if (b.pow_count == 0) return CanonicFactors(b.primes_array);
+		CanonicFactors result = (
+			b.pows[0].prime == 2 && b.pows[0].exp > 2 ?
+			CanonicFactors(b.primes_array, PrimePow(2, b.pows[0].exp - 2)) :
+			eulers_phi_pow(b.primes_array, b.pows[0])
+		);
 		for (pow_count_type i=1; i<b.pow_count; ++i) {
-			result = lcm(result, eulers_phi_pow(b.pows[i]));
+			result = lcm(result, eulers_phi_pow(b.primes_array, b.pows[i]));
 		}
 		return result;
 	}

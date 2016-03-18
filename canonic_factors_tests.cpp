@@ -6,16 +6,17 @@
 
 void test_constructor_and_value() {
 	typedef CanonicFactors<uint_fast64_t, 15> canonic_factors_type;
-	canonic_factors_type a;
+	canonic_factors_type::primes_array_type primes_array;
+	canonic_factors_type a(primes_array);
 	canonic_factors_type::num_type i, j;
 	for (i=1; i<=1024+1; ++i) {
-		a = i;
+		a.assign(i);
 		//printf("%u = ", i); a.dump(); printf("\n");
 		j = a.value();
 		assert(i == j);
 	}
 	for (i=UINT32_MAX; i>=UINT32_MAX-1024; --i) {
-		a = i;
+		a.assign(i);
 		j = a.value();
 		assert(i == j);
 	}
@@ -23,18 +24,21 @@ void test_constructor_and_value() {
 
 void test_mul() {
 	typedef CanonicFactors<uint_fast64_t, 15> canonic_factors_type;
-	canonic_factors_type a, b, c;
-	canonic_factors_type::num_type i, j, k;
+	canonic_factors_type::primes_array_type primes_array;
+	canonic_factors_type a(primes_array), b(primes_array), c(primes_array), d(primes_array);
+	canonic_factors_type::num_type i, j, k, l;
 	for (i=1; i<=1024+1; ++i) {
 		for (j=1; j<=1024+1; ++j) {
-			a = i;
-			b = j;
+			a.assign(i);
+			b.assign(j);
 			//printf("a = "); a.dump(); printf("\n");
 			//printf("b = "); b.dump(); printf("\n");
 			c = a * b;
+			d = a * j;
 			k = c.value();
-			//printf("i = %u j = %u k = %u\n", i, j, k);
+			l = d.value();
 			assert(k == i * j);
+			assert(l == i * j);
 		}
 	}
 }
@@ -54,10 +58,11 @@ uint_fast64_t phi(uint_fast64_t n) {
 
 void test_eulers_phi() {
 	typedef CanonicFactors<uint_fast64_t, 15> canonic_factors_type;
-	canonic_factors_type a, b;
+	canonic_factors_type::primes_array_type primes_array;
+	canonic_factors_type a(primes_array), b(primes_array);
 	unsigned int i, j;
 	for (i=1; i<=1024*2+1; ++i) {
-		a = i;
+		a.assign(i);
 		b = canonic_factors_type::eulers_phi(a);
 		j = b.value();
 		assert(j == phi(i));
@@ -102,10 +107,11 @@ uint_fast64_t phi_div_carmichael[] = {
 
 void test_carmichael() {
 	typedef CanonicFactors<uint_fast64_t, 15> canonic_factors_type;
-	canonic_factors_type a, b, c;
+	canonic_factors_type::primes_array_type primes_array;
+	canonic_factors_type a(primes_array), b(primes_array), c(primes_array);
 	unsigned int i, j, k;
 	for (i=1; i<sizeof(phi_div_carmichael)/sizeof(phi_div_carmichael[0]); ++i) {
-		a = i;
+		a.assign(i);
 		b = canonic_factors_type::carmichael(a);
 		c = canonic_factors_type::eulers_phi(a);
 		j = b.value();
