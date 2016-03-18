@@ -25,7 +25,6 @@ public:
 		}
 		return result;
 	}
-
 };
 
 #endif/*POW_MOD_H*/
