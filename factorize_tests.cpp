@@ -219,10 +219,10 @@ void test_prime_factors() {
 	uint_fast64_t my_prime_factors[MAX_PRIME_FACTORS];
 	
 	for (prfrs_type::num_type i=1; i<=UINT16_MAX; ++i) {
-		size_t count = get_prime_factors.get_prime_factors(i, prime_factors, MAX_PRIME_FACTORS);
-		size_t mycount = my_get_prime_factors(primes, i, my_prime_factors);
+		prfrs_type::prime_factors_count_type count = get_prime_factors.get_prime_factors(i, prime_factors, MAX_PRIME_FACTORS);
+		uint_fast8_t mycount = my_get_prime_factors(primes, i, my_prime_factors);
 		assert(count == mycount);
-		for (size_t j=0; j<count; ++j) {
+		for (prfrs_type::prime_factors_count_typet j=0; j<count; ++j) {
 			assert(prime_factors[j] == my_prime_factors[j]);
 		}
 	}

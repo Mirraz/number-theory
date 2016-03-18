@@ -184,14 +184,15 @@ template <typename NUM_TYPE>
 class GetPrimeFactors {
 public:
 	typedef NUM_TYPE num_type;
+	typedef uint_fast8_t prime_factors_count_type;
 	typedef PrimesArray<num_type> primes_array_type;
 	typedef Factorizer<num_type> factorizer_type;
 	
 private:
 	factorizer_type factorizer;
 	num_type *m_prime_factors;
-	size_t m_prime_factors_size;
-	size_t prime_factors_count;
+	prime_factors_count_type m_prime_factors_size;
+	prime_factors_count_type prime_factors_count;
 	
 public:
 	GetPrimeFactors(primes_array_type b_primes_array) :
@@ -214,7 +215,7 @@ private:
 	}
 	
 public:
-	size_t get_prime_factors(num_type n, num_type prime_factors[], size_t prime_factors_size) {
+	prime_factors_count_type get_prime_factors(num_type n, num_type prime_factors[], prime_factors_count_type prime_factors_size) {
 		m_prime_factors = prime_factors;
 		m_prime_factors_size = prime_factors_size;
 		prime_factors_count = 0;
