@@ -2,7 +2,7 @@
 #define FACTORIZE_H
 
 #include <assert.h>
-#include <stddef.h>		// size_t
+#include <stddef.h>		// size_t, NULL
 #include <stdint.h>
 #include <math.h>
 #include <functional>

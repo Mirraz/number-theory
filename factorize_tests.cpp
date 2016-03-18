@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>		// NULL
 #include <stdint.h>
 #include <inttypes.h>
 #include <math.h>
