@@ -15,6 +15,8 @@ public:
 	PrimesArray() : primes(NULL), count(0) {}
 	
 	PrimesArray(num_type *b_primes, size_t b_count) : primes(b_primes), count(b_count) {}
+	
+	PrimesArray(const PrimesArray &b) : primes(b.primes), count(b.count) {}
 };
 
 template <typename NUM_TYPE>
@@ -27,11 +29,11 @@ public:
 	typedef std::function<bool(num_type prime, exp_type exp)> factorize_cb_type;
 	
 private:
-	primes_array_type &primes_array;
+	primes_array_type primes_array;
 	factorize_cb_type cb;
 	
 public:
-	Factorizer(primes_array_type &b_primes_array, factorize_cb_type b_cb) :
+	Factorizer(primes_array_type b_primes_array, factorize_cb_type b_cb) :
 		primes_array(b_primes_array), cb(b_cb) {}
 	
 private:
@@ -96,26 +98,26 @@ public:
 		if (n != 1) cb(n, 1);
 	}
 	
-	static void fill_primes(primes_array_type &primes_array, size_t primes_size, num_type max_num) {
-		primes_array.count = 0;
-		if (primes_size == 0 || max_num < 2) return;
-		primes_array.primes[0] = 2;
-		++primes_array.count;
+	static size_t fill_primes(num_type primes[], size_t primes_size, num_type max_num) {
+		if (primes_size == 0 || max_num < 2) return 0;
+		primes[0] = 2;
+		size_t primes_count = 1;
 		num_type n = 3;
 		num_type n_sqrt = 1;
-		while (primes_array.count < primes_size && n <= max_num) {
+		while (primes_count < primes_size && n <= max_num) {
 			bool is_prime = true;
-			for (size_t i=0; primes_array.primes[i]<=n_sqrt; ++i) {
-				if (!(n % primes_array.primes[i])) {
+			for (size_t i=0; primes[i]<=n_sqrt; ++i) {
+				if (!(n % primes[i])) {
 					is_prime = false;
 					break;
 				}
 			}
-			assert(primes_array.count < primes_size);
-			if (is_prime) primes_array.primes[primes_array.count++] = n;
+			assert(primes_count < primes_size);
+			if (is_prime) primes[primes_count++] = n;
 			n += 2;
 			n_sqrt = round_sqrt(n);
 		}
+		return primes_count;
 	}
 };
 
@@ -133,7 +135,7 @@ private:
 	bool result;
 	
 public:
-	SumOfTwoSquaresChecker(primes_array_type &b_primes_array) :
+	SumOfTwoSquaresChecker(primes_array_type b_primes_array) :
 		factorizer(
 			b_primes_array,
 			std::bind(

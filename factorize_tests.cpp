@@ -137,28 +137,28 @@ void test_fill_primes() {
 	fzr_type::num_type primes[1024];
 	fzr_type::primes_array_type primes_array(primes, 0);
 	uint_fast64_t myprimes[1024];
-	size_t mycount;
+	size_t count, mycount;
 	
-	fzr_type::fill_primes(primes_array, 1024, UINT64_MAX);
-	assert(primes_array.count == 1024);
+	count = fzr_type::fill_primes(primes, 1024, UINT64_MAX);
+	assert(count == 1024);
 	mycount = my_fill_primes(myprimes, 1024, UINT64_MAX);
 	assert(mycount == 1024);
 	for (size_t i=0; i<1024; ++i) assert(primes_array.primes[i] == myprimes[i]);
 	
 	for (size_t i=0; i<1024; ++i) primes_array.primes[i] = myprimes[i] = 0;
 	const uint_fast64_t p_max = 8147;
-	fzr_type::fill_primes(primes_array, 1024, p_max);
+	count = fzr_type::fill_primes(primes, 1024, p_max);
 	mycount = my_fill_primes(myprimes, 1024, p_max);
-	assert(primes_array.count == mycount);
-	for (size_t i=0; i<primes_array.count; ++i) assert(primes_array.primes[i] == myprimes[i]);
+	assert(count == mycount);
+	for (size_t i=0; i<count; ++i) assert(primes_array.primes[i] == myprimes[i]);
 }
 
 void test_factorize_with_primes_array() {
 	typedef Factorizer<uint_fast64_t> fzr_type;
 	
 	fzr_type::num_type primes[65536];
-	fzr_type::primes_array_type primes_array(primes, 0);
-	fzr_type::fill_primes(primes_array, 65536, UINT64_MAX);
+	size_t primes_count = fzr_type::fill_primes(primes, 65536, UINT64_MAX);
+	fzr_type::primes_array_type primes_array(primes, primes_count);
 	
 	MyFactors factors;
 	fzr_type::factorize_cb_type cb = [&factors] (fzr_type::num_type prime, fzr_type::exp_type exp) -> bool {
@@ -185,7 +185,7 @@ void tests_suite() {
 	//test_round_sqrt();
 	//test_factorize();
 	//test_sum_of_two_squares();
-	//test_fill_primes();
+	test_fill_primes();
 	test_factorize_with_primes_array();
 }
 
