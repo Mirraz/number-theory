@@ -46,7 +46,7 @@ canonic_factors_tests: $(BUILD_DIR)/canonic_factors_tests.o
 	$(LD) -o $@ $^ $(LDFLAGS)
 	$(STRIP) $@
 
-$(BUILD_DIR)/canonic_factors_tests.o: $(SRC_DIR)/canonic_factors_tests.cpp $(SRC_DIR)/canonic_factors.h Makefile
+$(BUILD_DIR)/canonic_factors_tests.o: $(SRC_DIR)/canonic_factors_tests.cpp $(SRC_DIR)/canonic_factors.h $(SRC_DIR)/factorize.h Makefile
 	$(CC) -o $@ $< -c $(CFLAGS)
 
 clean_tests:

@@ -3,10 +3,10 @@
 
 #include <assert.h>
 #include <stdint.h>
-#include <math.h>
 #ifndef NDEBUG
 #  include <stdio.h>
 #endif
+#include "factorize.h"
 
 // primorial(4)  < 2^8  < primorial(5)
 // primorial(6)  < 2^16 < primorial(7)
@@ -29,12 +29,15 @@ public:
 	struct PrimePow {
 		num_type prime;
 		exp_type exp;
-	
+		
 		PrimePow() : prime(0), exp(0) {}
 		PrimePow(num_type b_prime, exp_type b_exp) : prime(b_prime), exp(b_exp) {}
 		PrimePow(const PrimePow &b) : prime(b.prime), exp(b.exp) {}
 	};
 	typedef PrimePow prime_pow_type;
+	
+	typedef Factorizer<num_type> factorizer_type;
+	typedef typename factorizer_type::primes_array_type primes_array_type;
 	
 private:
 	pow_count_type pow_count;
@@ -53,28 +56,19 @@ public:
 		pows[0] = b;
 	}
 	
-	CanonicFactors(num_type n) {
-		assert(n > 0);
+	CanonicFactors(primes_array_type b_primes_array, num_type n) {
 		pow_count = 0;
-		if (n == 1) return;
-		num_type n_sqrt = round(sqrt(n));
-		// TODO prepare and use table of small primes
-		for (num_type d=2; d<=n_sqrt; d+=2) {
-			if (n % d == 0) {
-				exp_type exp = 0;
-				do {
-					n /= d;
-					assert(exp < MAX_EXP);
-					++exp;
-				} while (n % d == 0);
-				assert(pow_count < MAX_POW_COUNT);
-				pows[pow_count++] = PrimePow(d, exp);
-				n_sqrt = round(sqrt(n));
-			}
-			if (d == 2) --d;
-		}
-		if (n > 1) pows[pow_count++] = PrimePow(n, 1);
+		typename factorizer_type::factorize_cb_type cb =
+				[this] (typename factorizer_type::num_type prime, typename factorizer_type::exp_type exp) -> bool {
+			assert(pow_count < MAX_POW_COUNT);
+			pows[pow_count++] = PrimePow(prime, exp);
+			return false;
+		};
+		factorizer_type factorizer(b_primes_array, cb);
+		factorizer.factorize(n);
 	}
+	
+	CanonicFactors(num_type n) : CanonicFactors(primes_array_type(), n) {}
 	
 	num_type value() const {
 		num_type n = 1;
