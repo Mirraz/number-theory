@@ -184,6 +184,8 @@ template <typename NUM_TYPE>
 class GetPrimeFactors {
 public:
 	typedef NUM_TYPE num_type;
+	// 256^286 < 2^2289 < primorial(256) < 2^2290 < 256^287
+	static_assert(sizeof(num_type) <= 286, "Too big num_type for prime_factors_count_type");
 	typedef uint_fast8_t prime_factors_count_type;
 	typedef PrimesArray<num_type> primes_array_type;
 	typedef Factorizer<num_type> factorizer_type;
