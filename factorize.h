@@ -1,3 +1,6 @@
+#ifndef FACTORIZE_H
+#define FACTORIZE_H
+
 #include <assert.h>
 #include <stddef.h>		// size_t
 #include <stdint.h>
@@ -168,4 +171,6 @@ public:
 		return result;
 	}
 };
+
+#endif/*FACTORIZE_H*/
 
