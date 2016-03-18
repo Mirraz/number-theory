@@ -39,6 +39,10 @@ public:
 	Factorizer(primes_array_type b_primes_array, factorize_cb_type b_cb) :
 		primes_array(b_primes_array), cb(b_cb) {}
 	
+	primes_array_type get_primes_array() const {
+		return primes_array;
+	}
+	
 private:
 	static_assert(sizeof(num_type) <= 8, "Too big num_type for round_sqrt");
 	static inline num_type round_sqrt(num_type n) {
