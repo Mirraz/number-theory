@@ -77,9 +77,21 @@ public:
 	// if cb returns true, factorize interrupts
 	void factorize(num_type n) const {
 		assert(n > 0);
-		num_type p = (primes_array.count == 0 ? 2 : primes_array.primes[0]);
-		size_t idx = 1;
+		if (n == 1) return;
+		
+		if (!(n & 1)) {
+			exp_type exp = 0;
+			do {
+				n >>= 1;
+				++exp;
+			} while (!(n & 1));
+			if (cb(2, exp)) return;
+		}
+		
 		num_type n_sqrt = round_sqrt(n);
+		num_type p = 3;
+		size_t idx = 2;
+		
 		while (p <= n_sqrt) {
 			if (!(n % p)) {
 				exp_type exp = 0;
@@ -87,15 +99,13 @@ public:
 					n /= p;
 					++exp;
 				} while (!(n % p));
-				if (cb(p, exp)) break;
+				if (cb(p, exp)) return;
 				n_sqrt = round_sqrt(n);
 			}
 			if (idx < primes_array.count) {
-				p = primes_array.primes[idx];
-				++idx;
+				p = primes_array.primes[idx++];
 			} else {
-				if (p != 2) p += 2;
-				else ++p;
+				p += 2;
 			}
 		}
 		if (n != 1) cb(n, 1);

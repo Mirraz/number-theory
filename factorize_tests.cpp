@@ -182,9 +182,9 @@ void test_factorize_with_primes_array() {
 
 void tests_suite() {
 	//test_round_sqrt();
-	//test_factorize();
-	//test_sum_of_two_squares();
-	test_fill_primes();
+	test_factorize();
+	test_sum_of_two_squares();
+	//test_fill_primes();
 	test_factorize_with_primes_array();
 }
 
