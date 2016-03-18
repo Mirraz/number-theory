@@ -68,9 +68,9 @@ void test_factorize() {
 		factorizer.factorize(i);
 		MyFactors my_factors = my_factorize(i);
 		assert(factors.pow_count == my_factors.pow_count);
-		for (uint_fast8_t i=0; i<factors.pow_count; ++i) {
-			assert(factors.pows[i].prime == my_factors.pows[i].prime);
-			assert(factors.pows[i].exp == my_factors.pows[i].exp);
+		for (uint_fast8_t j=0; j<factors.pow_count; ++j) {
+			assert(factors.pows[j].prime == my_factors.pows[j].prime);
+			assert(factors.pows[j].exp == my_factors.pows[j].exp);
 		}
 	}
 }
@@ -173,19 +173,68 @@ void test_factorize_with_primes_array() {
 		factorizer.factorize(i);
 		MyFactors my_factors = my_factorize(i);
 		assert(factors.pow_count == my_factors.pow_count);
-		for (uint_fast8_t i=0; i<factors.pow_count; ++i) {
-			assert(factors.pows[i].prime == my_factors.pows[i].prime);
-			assert(factors.pows[i].exp == my_factors.pows[i].exp);
+		for (uint_fast8_t j=0; j<factors.pow_count; ++j) {
+			assert(factors.pows[j].prime == my_factors.pows[j].prime);
+			assert(factors.pows[j].exp == my_factors.pows[j].exp);
+		}
+	}
+}
+
+// primorial(15) <= 2^64-1 < primorial(16)
+#define MAX_PRIME_FACTORS 15
+
+uint_fast8_t my_get_prime_factors(uint_fast64_t primes[], uint_fast64_t n, uint_fast64_t prime_factors[]) {
+	uint_fast8_t count = 0;
+	uint_fast64_t n_sqrt = round(sqrt(n));
+	for (size_t d_idx = 0; primes[d_idx] <= n_sqrt; ++d_idx) {
+		uint_fast64_t d = primes[d_idx];
+		if (n % d == 0) {
+			assert(count < MAX_PRIME_FACTORS);
+			prime_factors[count++] = d;
+			do {
+				n /= d;
+			} while (n % d == 0);
+		}
+		n_sqrt = round(sqrt(n));
+	}
+	if (n > 1) {
+		assert(count < MAX_PRIME_FACTORS);
+		prime_factors[count++] = n;
+	}
+	return count;
+}
+
+void test_prime_factors() {
+	typedef GetPrimeFactors<uint_fast64_t> prfrs_type;
+	
+	// pi(2^16) = 6542
+	prfrs_type::num_type primes[6542];
+	size_t primes_count = prfrs_type::factorizer_type::fill_primes(primes, 6542, (prfrs_type::num_type)UINT16_MAX+1);
+	assert(primes_count == 6542);
+	prfrs_type::primes_array_type primes_array(primes, primes_count);
+	
+	prfrs_type get_prime_factors(primes_array);
+	
+	prfrs_type::num_type prime_factors[MAX_PRIME_FACTORS];
+	uint_fast64_t my_prime_factors[MAX_PRIME_FACTORS];
+	
+	for (prfrs_type::num_type i=1; i<=UINT16_MAX; ++i) {
+		size_t count = get_prime_factors.get_prime_factors(i, prime_factors, MAX_PRIME_FACTORS);
+		size_t mycount = my_get_prime_factors(primes, i, my_prime_factors);
+		assert(count == mycount);
+		for (size_t j=0; j<count; ++j) {
+			assert(prime_factors[j] == my_prime_factors[j]);
 		}
 	}
 }
 
 void tests_suite() {
 	//test_round_sqrt();
-	test_factorize();
-	test_sum_of_two_squares();
+	//test_factorize();
+	//test_sum_of_two_squares();
 	//test_fill_primes();
-	test_factorize_with_primes_array();
+	//test_factorize_with_primes_array();
+	test_prime_factors();
 }
 
 int main() {
