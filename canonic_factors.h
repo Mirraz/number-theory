@@ -4,6 +4,9 @@
 #include <assert.h>
 #include <stdint.h>
 #include <math.h>
+#ifndef NDEBUG
+#  include <stdio.h>
+#endif
 
 typedef uint_fast8_t pow_count_type;
 typedef uint_fast8_t exp_type;
