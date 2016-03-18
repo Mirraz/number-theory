@@ -5,8 +5,9 @@
 #include "canonic_factors.h"
 
 void test_constructor_and_value() {
-	num_type i, j;
-	CanonicFactors a;
+	typedef CanonicFactors<uint_fast64_t, 15> canonic_factors_type;
+	canonic_factors_type a;
+	canonic_factors_type::num_type i, j;
 	for (i=1; i<=1024+1; ++i) {
 		a = i;
 		//printf("%u = ", i); a.dump(); printf("\n");
@@ -21,8 +22,9 @@ void test_constructor_and_value() {
 }
 
 void test_mul() {
-	num_type i, j, k;
-	CanonicFactors a, b, c;
+	typedef CanonicFactors<uint_fast64_t, 15> canonic_factors_type;
+	canonic_factors_type a, b, c;
+	canonic_factors_type::num_type i, j, k;
 	for (i=1; i<=1024+1; ++i) {
 		for (j=1; j<=1024+1; ++j) {
 			a = i;
@@ -51,11 +53,12 @@ uint_fast64_t phi(uint_fast64_t n) {
 }
 
 void test_eulers_phi() {
+	typedef CanonicFactors<uint_fast64_t, 15> canonic_factors_type;
+	canonic_factors_type a, b;
 	unsigned int i, j;
-	CanonicFactors a, b;
 	for (i=1; i<=1024*2+1; ++i) {
 		a = i;
-		b = CanonicFactors::eulers_phi(a);
+		b = canonic_factors_type::eulers_phi(a);
 		j = b.value();
 		assert(j == phi(i));
 	}
@@ -98,12 +101,13 @@ uint_fast64_t phi_div_carmichael[] = {
 };
 
 void test_carmichael() {
+	typedef CanonicFactors<uint_fast64_t, 15> canonic_factors_type;
+	canonic_factors_type a, b, c;
 	unsigned int i, j, k;
-	CanonicFactors a, b, c;
 	for (i=1; i<sizeof(phi_div_carmichael)/sizeof(phi_div_carmichael[0]); ++i) {
 		a = i;
-		b = CanonicFactors::carmichael(a);
-		c = CanonicFactors::eulers_phi(a);
+		b = canonic_factors_type::carmichael(a);
+		c = canonic_factors_type::eulers_phi(a);
 		j = b.value();
 		k = c.value();
 		assert(k % j == 0);

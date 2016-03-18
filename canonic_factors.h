@@ -8,31 +8,34 @@
 #  include <stdio.h>
 #endif
 
-typedef uint_fast8_t pow_count_type;
-typedef uint_fast8_t exp_type;
-typedef uint_fast32_t num_type;
-#ifndef NDEBUG
-#  define POW_COUNT_PRI PRIuFAST8
-#  define EXP_PRI PRIuFAST8
-#  define NUM_PRI PRIuFAST32
-#endif
-#define NUM_MAX_MASK (((num_type)1) << 31)
+// primorial(4)  < 2^8  < primorial(5)
+// primorial(6)  < 2^16 < primorial(7)
+// primorial(9)  < 2^32 < primorial(10)
+// primorial(15) < 2^64 < primorial(16)
 
-// 2^31 <= UINT32_MAX < 2^32
-#define MAX_EXP 31
-// primorial(9) <= UINT32_MAX < primorial(10)
-#define MAX_POW_COUNT 9
-
-struct PrimePow {
-	num_type prime;
-	exp_type exp;
-	
-	PrimePow() : prime(0), exp(0) {}
-	PrimePow(num_type b_prime, exp_type b_exp) : prime(b_prime), exp(b_exp) {}
-	PrimePow(const PrimePow &b) : prime(b.prime), exp(b.exp) {}
-};
-
+template<typename NUM_TYPE, uint_fast8_t MAX_POW_COUNT>
 class CanonicFactors {
+public:
+	typedef NUM_TYPE num_type;
+	static_assert(sizeof(num_type) <= 32, "Too big num_type for exp_type");
+	typedef uint_fast8_t exp_type;
+	// prevent sum overflow
+	static constexpr uint_fast8_t MAX_EXP = 127;
+	// 256^286 < 2^2289 < primorial(256) < 2^2290 < 256^287
+	static_assert(sizeof(num_type) <= 286, "Too big num_type for pow_count_type");
+	typedef uint_fast8_t pow_count_type;
+	static_assert(MAX_POW_COUNT > 0, "MAX_POW_COUNT can't be zero");
+	
+	struct PrimePow {
+		num_type prime;
+		exp_type exp;
+	
+		PrimePow() : prime(0), exp(0) {}
+		PrimePow(num_type b_prime, exp_type b_exp) : prime(b_prime), exp(b_exp) {}
+		PrimePow(const PrimePow &b) : prime(b.prime), exp(b.exp) {}
+	};
+	typedef PrimePow prime_pow_type;
+	
 private:
 	pow_count_type pow_count;
 	PrimePow pows[MAX_POW_COUNT];
@@ -91,14 +94,14 @@ public:
 	
 #ifndef NDEBUG
 	void fdump(FILE *stream) const {
-		fprintf(stream, "%" POW_COUNT_PRI "[", pow_count);
+		fprintf(stream, "%u[", (unsigned int)pow_count);
 		if (pow_count > 0) {
 			for (pow_count_type i=0; i<pow_count; ++i) {
 				fprintf(
 					stream,
-					"%" NUM_PRI "^%" EXP_PRI "%s",
-					pows[i].prime,
-					pows[i].exp,
+					"%llu^%u%s",
+					(unsigned long long)pows[i].prime,
+					(unsigned int)pows[i].exp,
 					(i != pow_count-1 ? " " : "")
 				);
 			}
