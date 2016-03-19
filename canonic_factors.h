@@ -78,19 +78,25 @@ public:
 		b.pow_count = 0;
 	}
 	
+private:
+	void assign(const CanonicFactors &b) {
+		factorizer = factorizer_type(
+			b.factorizer.get_primes_array(),
+			std::bind(
+				&CanonicFactors::factorize_cb,
+				this,
+				std::placeholders::_1,
+				std::placeholders::_2
+			)
+		);
+		pow_count = b.pow_count;
+		std::copy(b.pows, b.pows+b.pow_count, pows);
+	}
+	
+public:
 	CanonicFactors& operator=(CanonicFactors &&b) {
 		if (this != &b) {
-			factorizer = factorizer_type(
-				b.factorizer.get_primes_array(),
-				std::bind(
-					&CanonicFactors::factorize_cb,
-					this,
-					std::placeholders::_1,
-					std::placeholders::_2
-				)
-			);
-			pow_count = b.pow_count;
-			std::copy(b.pows, b.pows+b.pow_count, pows);
+			assign(b);
 			b.factorizer = factorizer_type(primes_array_type(), typename factorizer_type::factorize_cb_type());
 			b.pow_count = 0;
 		}
@@ -98,19 +104,7 @@ public:
 	}
 	
 	CanonicFactors& operator=(const CanonicFactors &b) {
-		if (this != &b) {
-			factorizer = factorizer_type(
-				b.factorizer.get_primes_array(),
-				std::bind(
-					&CanonicFactors::factorize_cb,
-					this,
-					std::placeholders::_1,
-					std::placeholders::_2
-				)
-			);
-			pow_count = b.pow_count;
-			std::copy(b.pows, b.pows+b.pow_count, pows);
-		}
+		if (this != &b) assign(b);
 		return *this;
 	}
 	
@@ -147,7 +141,7 @@ public:
 	
 	pow_count_type copy(PrimePow result_pows[], pow_count_type result_pows_size) const {
 		assert(result_pows_size >= pow_count);
-		for (pow_count_type i=0; i<pow_count; ++i) result_pows[i] = pows[i];
+		std::copy(pows, pows+pow_count, result_pows);
 		return pow_count;
 	}
 	
