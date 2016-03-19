@@ -129,7 +129,8 @@ public:
 		factorizer.factorize(n);
 	}
 	
-	num_type value() const {
+	// some pows[i].exp may be == 0
+	static num_type value(const PrimePow pows[], pow_count_type pow_count) {
 		num_type n = 1;
 		for (pow_count_type i=0; i<pow_count; ++i) {
 			// TODO fast pow
@@ -140,7 +141,12 @@ public:
 		return n;
 	}
 	
-	pow_count_type copy(PrimePow result_pows[]) const {
+	num_type value() const {
+		return value(pows, pow_count);
+	}
+	
+	pow_count_type copy(PrimePow result_pows[], pow_count_type result_pows_size) const {
+		assert(result_pows_size >= pow_count);
 		for (pow_count_type i=0; i<pow_count; ++i) result_pows[i] = pows[i];
 		return pow_count;
 	}
