@@ -1,6 +1,7 @@
 CC=g++
 LD=g++
 STRIP=strip -s
+#STRIP=true
 WARNINGS=-Wall -Wextra -pedantic
 DEBUG=
 #DEBUG=-g -ggdb
