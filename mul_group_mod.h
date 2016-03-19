@@ -2,6 +2,7 @@
 #define MUL_GROUP_MOD_H
 
 #include <assert.h>
+#include <stdint.h>
 #include "canonic_factors.h"
 #include "pow_mod.h"
 
