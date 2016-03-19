@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdint.h>
 #include "mul_group_mod.h"
 
 uint_fast64_t gcd(uint_fast64_t a, uint_fast64_t b) {
