@@ -121,11 +121,27 @@ void test_carmichael() {
 	}
 }
 
+void test_carmichael_02() {
+	typedef CanonicFactors<uint_fast64_t, 15> cf_type;
+	cf_type::num_type primes[65536];
+	size_t primes_count = cf_type::primes_array_type::fill_primes(primes, 65536, UINT64_MAX);
+	cf_type::primes_array_type primes_array(primes, primes_count);
+	for (size_t idx=0; idx<primes_count; ++idx) {
+		cf_type::num_type p = primes[idx];
+		cf_type cf_p(primes_array, p);
+		cf_type::num_type eulers_phi = cf_type::eulers_phi(cf_p).value();
+		cf_type::num_type carmichael = cf_type::carmichael(cf_p).value();
+		assert(eulers_phi == carmichael);
+		assert(eulers_phi == p - 1);
+	}
+}
+
 void tests_suite() {
 	test_constructor_and_value();
 	test_mul();
 	test_eulers_phi();
 	test_carmichael();
+	test_carmichael_02();
 }
 
 int main() {
