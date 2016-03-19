@@ -60,6 +60,24 @@ public:
 		assert(pow_mod_type::pow_mod(modulo, element, exp_value) == 1);
 		return exp_value;
 	}
+	
+	// gcd(modulo, root) == 1, module is prime
+	bool is_primitive_root(num_type root) const {
+		assert(modulo > 1);
+		assert(pow_mod_type::pow_mod(modulo, root, group_exponent.value()) == 1);
+		if (modulo <= 3) return true;
+		prime_pow_type exp_pows[MAX_POW_COUNT];
+		pow_count_type exp_pow_count = group_exponent.copy(exp_pows, MAX_POW_COUNT);
+		num_type group_exponent_value = group_exponent.value();
+		for (pow_count_type i=0; i<exp_pow_count; ++i) {
+			assert(group_exponent_value > exp_pows[i].prime);
+			assert(group_exponent_value % exp_pows[i].prime == 0);
+			num_type exp = group_exponent_value / exp_pows[i].prime;
+			num_type pow = pow_mod_type::pow_mod(modulo, root, exp);
+			if (pow == 1) return false;
+		}
+		return true;
+	}
 };
 
 #endif/*MUL_GROUP_MOD_H*/
