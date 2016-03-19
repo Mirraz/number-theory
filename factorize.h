@@ -7,6 +7,8 @@
 #include <math.h>
 #include <functional>
 
+template <typename NUM_TYPE> class Factorizer;
+
 template <typename NUM_TYPE>
 struct PrimesArray {
 public:
@@ -18,6 +20,10 @@ public:
 	PrimesArray() : primes(NULL), count(0) {}
 	PrimesArray(num_type *b_primes, size_t b_count) : primes(b_primes), count(b_count) {}
 	// use default copy constructor and assignment operator
+	
+	static size_t fill_primes(num_type primes[], size_t primes_size, num_type max_num) {
+		return Factorizer<num_type>::fill_primes(primes, primes_size, max_num);
+	}
 };
 
 template <typename NUM_TYPE>
