@@ -209,7 +209,7 @@ void test_prime_factors() {
 	
 	// pi(2^16) = 6542
 	prfrs_type::num_type primes[6542];
-	size_t primes_count = prfrs_type::factorizer_type::fill_primes(primes, 6542, (prfrs_type::num_type)UINT16_MAX+1);
+	size_t primes_count = prfrs_type::primes_array_type::fill_primes(primes, 6542, (prfrs_type::num_type)UINT16_MAX+1);
 	assert(primes_count == 6542);
 	prfrs_type::primes_array_type primes_array(primes, primes_count);
 	

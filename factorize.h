@@ -148,8 +148,10 @@ template <typename NUM_TYPE>
 class SumOfTwoSquaresChecker {
 public:
 	typedef NUM_TYPE num_type;
-	typedef PrimesArray<num_type> primes_array_type;
+private:
 	typedef Factorizer<num_type> factorizer_type;
+public:
+	typedef typename factorizer_type::primes_array_type primes_array_type;
 	
 private:
 	factorizer_type factorizer;
@@ -201,8 +203,10 @@ public:
 	// 256^286 < 2^2289 < primorial(256) < 2^2290 < 256^287
 	static_assert(sizeof(num_type) <= 286, "Too big num_type for prime_factors_count_type");
 	typedef uint_fast8_t prime_factors_count_type;
-	typedef PrimesArray<num_type> primes_array_type;
+private:
 	typedef Factorizer<num_type> factorizer_type;
+public:
+	typedef typename factorizer_type::primes_array_type primes_array_type;
 	
 private:
 	factorizer_type factorizer;
