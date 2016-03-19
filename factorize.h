@@ -16,10 +16,8 @@ public:
 	size_t count;
 	
 	PrimesArray() : primes(NULL), count(0) {}
-	
 	PrimesArray(num_type *b_primes, size_t b_count) : primes(b_primes), count(b_count) {}
-	
-	PrimesArray(const PrimesArray &b) : primes(b.primes), count(b.count) {}
+	// use default copy constructor and assignment operator
 };
 
 template <typename NUM_TYPE>
@@ -38,6 +36,8 @@ private:
 public:
 	Factorizer(primes_array_type b_primes_array, factorize_cb_type b_cb) :
 		primes_array(b_primes_array), cb(b_cb) {}
+	
+	// use default copy constructor and assignment operator
 	
 	primes_array_type get_primes_array() const {
 		return primes_array;
@@ -149,6 +149,10 @@ private:
 	factorizer_type factorizer;
 	bool result;
 	
+	SumOfTwoSquaresChecker() = delete;
+	SumOfTwoSquaresChecker(const SumOfTwoSquaresChecker &b) = delete;
+	SumOfTwoSquaresChecker& operator=(const SumOfTwoSquaresChecker &b) = delete;
+	
 public:
 	SumOfTwoSquaresChecker(primes_array_type b_primes_array) :
 		factorizer(
@@ -199,6 +203,10 @@ private:
 	num_type *m_prime_factors;
 	prime_factors_count_type m_prime_factors_size;
 	prime_factors_count_type prime_factors_count;
+	
+	GetPrimeFactors() = delete;
+	GetPrimeFactors(const GetPrimeFactors &b) = delete;
+	GetPrimeFactors& operator=(const GetPrimeFactors &b) = delete;
 	
 public:
 	GetPrimeFactors(primes_array_type b_primes_array) :
