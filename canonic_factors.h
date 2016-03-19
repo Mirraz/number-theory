@@ -6,6 +6,8 @@
 #ifndef NDEBUG
 #  include <stdio.h>
 #endif
+#include <functional>
+#include <algorithm>
 #include "factorize.h"
 
 // primorial(4)  < 2^8  < primorial(5)
@@ -64,7 +66,50 @@ public:
 	
 	CanonicFactors(const CanonicFactors &b) : CanonicFactors(b.factorizer.get_primes_array()) {
 		pow_count = b.pow_count;
-		for (pow_count_type i=0; i<b.pow_count; ++i) pows[i] = b.pows[i];
+		std::copy(b.pows, b.pows+b.pow_count, pows);
+	}
+	
+	CanonicFactors(CanonicFactors &&b) : CanonicFactors(b.factorizer.get_primes_array()) {
+		pow_count = b.pow_count;
+		std::copy(b.pows, b.pows+b.pow_count, pows);
+		b.factorizer = factorizer_type(primes_array_type(), typename factorizer_type::factorize_cb_type());
+		b.pow_count = 0;
+	}
+	
+	CanonicFactors& operator=(CanonicFactors &&b) {
+		if (this != &b) {
+			factorizer = factorizer_type(
+				b.factorizer.get_primes_array(),
+				std::bind(
+					&CanonicFactors::factorize_cb,
+					this,
+					std::placeholders::_1,
+					std::placeholders::_2
+				)
+			);
+			pow_count = b.pow_count;
+			std::copy(b.pows, b.pows+b.pow_count, pows);
+			b.factorizer = factorizer_type(primes_array_type(), typename factorizer_type::factorize_cb_type());
+			b.pow_count = 0;
+		}
+		return *this;
+	}
+	
+	CanonicFactors& operator=(const CanonicFactors &b) {
+		if (this != &b) {
+			factorizer = factorizer_type(
+				b.factorizer.get_primes_array(),
+				std::bind(
+					&CanonicFactors::factorize_cb,
+					this,
+					std::placeholders::_1,
+					std::placeholders::_2
+				)
+			);
+			pow_count = b.pow_count;
+			std::copy(b.pows, b.pows+b.pow_count, pows);
+		}
+		return *this;
 	}
 	
 	CanonicFactors(primes_array_type primes_array, const PrimePow &b) : CanonicFactors(primes_array) {
