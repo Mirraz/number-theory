@@ -196,57 +196,5 @@ public:
 	}
 };
 
-template <typename NUM_TYPE>
-class GetPrimeFactors {
-public:
-	typedef NUM_TYPE num_type;
-	// 256^286 < 2^2289 < primorial(256) < 2^2290 < 256^287
-	static_assert(sizeof(num_type) <= 286, "Too big num_type for prime_factors_count_type");
-	typedef uint_fast8_t prime_factors_count_type;
-private:
-	typedef Factorizer<num_type> factorizer_type;
-public:
-	typedef typename factorizer_type::primes_array_type primes_array_type;
-	
-private:
-	factorizer_type factorizer;
-	num_type *m_prime_factors;
-	prime_factors_count_type m_prime_factors_size;
-	prime_factors_count_type prime_factors_count;
-	
-	GetPrimeFactors() = delete;
-	GetPrimeFactors(const GetPrimeFactors &b) = delete;
-	GetPrimeFactors& operator=(const GetPrimeFactors &b) = delete;
-	
-public:
-	GetPrimeFactors(primes_array_type b_primes_array) :
-		factorizer(
-			b_primes_array,
-			std::bind(
-				&GetPrimeFactors::factorize_cb,
-				this,
-				std::placeholders::_1,
-				std::placeholders::_2
-			)
-		) {}
-	
-private:
-	bool factorize_cb(typename factorizer_type::num_type prime, typename factorizer_type::exp_type exp) {
-		(void)exp;
-		assert(prime_factors_count < m_prime_factors_size);
-		m_prime_factors[prime_factors_count++] = prime;
-		return false;
-	}
-	
-public:
-	prime_factors_count_type get_prime_factors(num_type n, num_type prime_factors[], prime_factors_count_type prime_factors_size) {
-		m_prime_factors = prime_factors;
-		m_prime_factors_size = prime_factors_size;
-		prime_factors_count = 0;
-		factorizer.factorize(n);
-		return prime_factors_count;
-	}
-};
-
 #endif/*FACTORIZE_H*/
 
