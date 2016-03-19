@@ -16,12 +16,15 @@ private:
 public:
 	typedef typename get_prime_factors_type::prime_factors_count_type prime_factors_count_type;
 	typedef typename get_prime_factors_type::primes_array_type primes_array_type;
-	typedef typename get_prime_factors_type::factorizer_type factorizer_type;
 	
 private:
 	num_type modulo;
 	num_type exps[MAX_PRIME_FACTORS_COUNT];
 	prime_factors_count_type exps_count;
+	
+	PrimitiveRoots() = delete;
+	PrimitiveRoots(const PrimitiveRoots &b) = delete;
+	PrimitiveRoots& operator=(const PrimitiveRoots &b) = delete;
 	
 public:
 	// modulo must be prime

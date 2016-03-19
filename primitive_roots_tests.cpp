@@ -11,7 +11,7 @@ void test_is_primitive_root() {
 	
 	// pi(2^16) = 6542
 	prrs_type::num_type primes[6542];
-	size_t primes_count = prrs_type::factorizer_type::fill_primes(
+	size_t primes_count = prrs_type::primes_array_type::fill_primes(
 		primes,
 		sizeof(primes) / sizeof(primes[0]),
 		(prrs_type::num_type)UINT16_MAX + 1
@@ -150,7 +150,7 @@ void test_max_primitive_root() {
 	
 	// pi(2^16) = 6542
 	prrs_type::num_type primes[6542];
-	size_t primes_count = prrs_type::factorizer_type::fill_primes(
+	size_t primes_count = prrs_type::primes_array_type::fill_primes(
 		primes,
 		sizeof(primes) / sizeof(primes[0]),
 		(prrs_type::num_type)UINT16_MAX + 1
