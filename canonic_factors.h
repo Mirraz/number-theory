@@ -168,14 +168,9 @@ public:
 #endif
 	
 private:
-	static primes_array_type max_primes_array(const primes_array_type &a, const primes_array_type &b) {
-		if (a.count < b.count) return b;
-		return a;
-	}
-	
 	// TODO maybe more optimal mul_assign_static
 	static CanonicFactors mul_static(const CanonicFactors &a, const CanonicFactors &b) {
-		CanonicFactors result(max_primes_array(a.factorizer.get_primes_array(), b.factorizer.get_primes_array()));
+		CanonicFactors result(a.factorizer.get_primes_array());
 		result.pow_count = 0;
 		pow_count_type i = 0, j = 0;
 		while (i < a.pow_count || j < b.pow_count) {
@@ -221,7 +216,7 @@ public:
 	
 private:
 	static CanonicFactors mul_pow_static(const CanonicFactors &a, const PrimePow &b) {
-		CanonicFactors result(max_primes_array(a.factorizer.get_primes_array(), b.factorizer.get_primes_array()));
+		CanonicFactors result(a.factorizer.get_primes_array());
 		pow_count_type i;
 		for (i=0; i<a.pow_count && a.pows[i].prime < b.prime; ++i) {
 			result.pows[i] = a.pows[i];
@@ -242,6 +237,7 @@ private:
 			result.pows[i] = b;
 			result.pow_count = a.pow_count + 1;
 		}
+		return result;
 	}
 	
 	static void mul_pow_assign_static(CanonicFactors &result, const PrimePow &b) {
@@ -271,7 +267,7 @@ public:
 	
 public:
 	static CanonicFactors lcm(const CanonicFactors &a, const CanonicFactors &b) {
-		CanonicFactors result(max_primes_array(a.factorizer.get_primes_array(), b.factorizer.get_primes_array()));
+		CanonicFactors result(a.factorizer.get_primes_array());
 		result.pow_count = 0;
 		pow_count_type i = 0, j = 0;
 		while (i < a.pow_count || j < b.pow_count) {
