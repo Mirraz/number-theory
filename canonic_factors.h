@@ -28,7 +28,9 @@ public:
 	typedef uint_fast8_t pow_count_type;
 	static_assert(MAX_POW_COUNT > 0, "MAX_POW_COUNT can't be zero");
 	
+private:
 	typedef Factorizer<num_type> factorizer_type;
+public:
 	typedef typename factorizer_type::primes_array_type primes_array_type;
 	
 	struct PrimePow {
@@ -118,12 +120,12 @@ public:
 	}
 	
 	CanonicFactors(primes_array_type primes_array, num_type n) : CanonicFactors(primes_array) {
-		pow_count = 0;
-		factorizer.factorize(n);
+		assign(n);
 	}
 	
 	void assign(num_type n) {
 		pow_count = 0;
+		if (n == 1) return; // just for optimisation
 		factorizer.factorize(n);
 	}
 	
@@ -267,13 +269,6 @@ public:
 		mul_pow_assign_static(*this, b);
 	}
 	
-private:
-	template <typename T>
-	static T max(T a, T b) {
-		if (a < b) return b;
-		return a;
-	}
-	
 public:
 	static CanonicFactors lcm(const CanonicFactors &a, const CanonicFactors &b) {
 		CanonicFactors result(max_primes_array(a.factorizer.get_primes_array(), b.factorizer.get_primes_array()));
@@ -294,7 +289,7 @@ public:
 				assert(a.pows[i].prime == b.pows[j].prime);
 				assert(result.pow_count < MAX_POW_COUNT);
 				assert(a.pows[i].exp + b.pows[j].exp <= MAX_EXP);
-				result.pows[result.pow_count++] = PrimePow(a.pows[i].prime, max(a.pows[i].exp, b.pows[j].exp));
+				result.pows[result.pow_count++] = PrimePow(a.pows[i].prime, std::max(a.pows[i].exp, b.pows[j].exp));
 				++i; ++j;
 			}
 		}
@@ -320,7 +315,7 @@ private:
 public:
 	static CanonicFactors carmichael(const CanonicFactors &b) {
 		if (b.pow_count == 0) return CanonicFactors(b.factorizer.get_primes_array());
-		CanonicFactors result = (
+		CanonicFactors result(
 			b.pows[0].prime == 2 && b.pows[0].exp > 2 ?
 			CanonicFactors(b.factorizer.get_primes_array(), PrimePow(2, b.pows[0].exp - 2)) :
 			eulers_phi_pow(b.factorizer.get_primes_array(), b.pows[0])
