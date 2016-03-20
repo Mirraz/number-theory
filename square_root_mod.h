@@ -11,6 +11,8 @@ public:
 private:
 	typedef PowMod<num_type, NUM_TYPE_MAX_MASK, OPERATION_TYPE> pow_mod_type;
 	typedef typename pow_mod_type::operation_type operation_type;
+	static_assert(sizeof(num_type) <= 32, "NUM_TYPE is too big for pow_count_type");
+	typedef uint_fast8_t pow_count_type;
 	
 public:
 	// legendre symbol (a / p)
@@ -28,7 +30,9 @@ public:
 	}
 	
 	// p - odd prime
-	// primes_count enough to find least nonresidue: least nonresidue <= sqrt(p) * ln(p) + 1
+	// primes_count enough to find least nonresidue
+	//     least nonresidue <= sqrt(p) * ln(p) + 1
+	//     least nonresidue << O(log(p)^2) (on assumption of Generalised Riemann hypothesis)
 	// returns 0 if least nonresidue is not found
 	static num_type least_nonresidue(num_type primes[], size_t primes_count, num_type p) {
 		assert(p > 2);
@@ -54,7 +58,7 @@ public:
 		if (pow_mod_type::pow_mod(p, a, (p-1)>>1) != 1) return 0;
 		
 		num_type k = p - 1;
-		uint_fast8_t h = 0;
+		pow_count_type h = 0;
 		while (!(k & 1)) {
 			k >>= 1;
 			++h;

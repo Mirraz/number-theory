@@ -24,9 +24,8 @@ void test_least_nonresidue() {
 	size_t primes_count = primes_array_type::fill_primes(primes, 65536, UINT32_MAX);
 	assert(primes_count == 65536);
 	
-	num_type p;
 	for (size_t idx=1; idx<primes_count; ++idx) {
-		p = primes[idx];
+		num_type p = primes[idx];
 		num_type nr = srm_type::least_nonresidue(primes, primes_count, p);
 		assert(nr != 0);
 		num_type my_nr = my_min_nonresidue(primes, primes_count, p);
@@ -42,9 +41,8 @@ void test_square_root_mod_algo_01() {
 	size_t primes_count = primes_array_type::fill_primes(primes, 1024, UINT32_MAX);
 	assert(primes_count == 1024);
 	
-	num_type p;
 	for (size_t idx=1; idx<primes_count; ++idx) {
-		p = primes[idx];
+		num_type p = primes[idx];
 		num_type nr = srm_type::least_nonresidue(primes, primes_count, p);
 		assert(nr != 0);
 		num_type r_count = 0, nr_count = 0;
