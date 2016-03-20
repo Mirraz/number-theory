@@ -198,6 +198,50 @@ void test_prime_checker() {
 	}
 }
 
+uint_fast64_t my_divisors_count(uint_fast64_t primes[], size_t primes_count, uint_fast64_t n) {
+	assert(n > 0);
+	if (n == 1) return 1;
+	uint_fast64_t div_count = 1;
+	uint_fast64_t n_sqrt = round(sqrt(n));
+	for (size_t i=0; i<primes_count; ++i) {
+		uint_fast64_t d = primes[i];
+		if (d > n_sqrt) break;
+		if (n % d == 0) {
+			uint_fast8_t exp = 0;
+			do {
+				n /= d;
+				++exp;
+			} while (n % d == 0);
+			div_count *= exp + 1;
+			n_sqrt = round(sqrt(n));
+		}
+	}
+	if (n > 1) div_count *= 2;
+	return div_count;
+}
+
+void test_divisors_count() {
+	typedef uint_fast64_t num_type;
+	typedef DivisorsCounter<num_type> divisors_counter_type;
+	// pi(2^16) = 6542
+	num_type primes[6542];
+	size_t primes_count = divisors_counter_type::primes_array_type::fill_primes(primes, 6542, 65536);
+	assert(primes_count == 6542);
+	divisors_counter_type::primes_array_type primes_array(primes, primes_count);
+	divisors_counter_type divisors_counter(primes_array);
+	
+	for (num_type i=1; i<1024*4+1; ++i) {
+		num_type d_count = divisors_counter.divisors_count(i);
+		num_type my_d_count = my_divisors_count(primes, primes_count, i);
+		assert(d_count == my_d_count);
+	}
+	for (num_type i=UINT32_MAX; i>=UINT32_MAX-1024*4-1; --i) {
+		num_type d_count = divisors_counter.divisors_count(i);
+		num_type my_d_count = my_divisors_count(primes, primes_count, i);
+		assert(d_count == my_d_count);
+	}
+}
+
 void tests_suite() {
 	test_round_sqrt();
 	test_factorize();
@@ -205,6 +249,7 @@ void tests_suite() {
 	test_fill_primes();
 	test_factorize_with_primes_array();
 	test_prime_checker();
+	test_divisors_count();
 }
 
 int main() {

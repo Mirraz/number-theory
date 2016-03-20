@@ -190,6 +190,51 @@ public:
 	}
 };
 
+template< typename NUM_TYPE>
+class DivisorsCounter {
+public:
+	typedef NUM_TYPE num_type;
+private:
+	typedef Factorizer<num_type> factorizer_type;
+public:
+	typedef typename factorizer_type::primes_array_type primes_array_type;
+	
+private:
+	factorizer_type factorizer;
+	num_type count;
+	DivisorsCounter() = delete;
+	DivisorsCounter(const DivisorsCounter &b) = delete;
+	DivisorsCounter& operator=(const DivisorsCounter &b) = delete;
+	
+public:
+	DivisorsCounter(primes_array_type b_primes_array) :
+		factorizer(
+			b_primes_array,
+			std::bind(
+				&DivisorsCounter::factorize_cb,
+				this,
+				std::placeholders::_1,
+				std::placeholders::_2
+			)
+		) {}
+	
+private:
+	bool factorize_cb(typename factorizer_type::num_type prime, typename factorizer_type::exp_type exp) {
+			(void)prime;
+			count *= exp + 1;
+			return false;
+	}
+	
+public:
+	num_type divisors_count(num_type n) {
+		assert(n > 0);
+		if (n == 1) return 1;
+		count = 1;
+		factorizer.factorize(n);
+		return count;
+	}
+};
+
 template <typename NUM_TYPE>
 class SumOfTwoSquaresChecker {
 public:
