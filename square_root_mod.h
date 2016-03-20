@@ -47,11 +47,11 @@ public:
 		return (a_op * a_op) % p_op;
 	}
 	
-	// solve x^2 = a (mod p)
-	// p - prime
-	// nr - quadratic nonresidue for p
-	// if a is not quadratic residue returns 0
-	// else returns any (of two) square root
+	static num_type mul_mod(num_type p, num_type a, num_type b) {
+		operation_type p_op = p, a_op = a, b_op = b;
+		return (a_op * b_op) % p_op;
+	}
+	
 	static num_type square_root_mod_algo_01(num_type p, num_type nr, num_type a) {
 		assert(p > 2);
 		assert(a > 0);
@@ -77,6 +77,61 @@ public:
 		}
 		assert(0);
 		return 0;
+	}
+	
+	// p - odd prime
+	// a - quadratic residue modulo p
+	// nr - quadratic nonresidue modulo p
+	// if p = 4k+3 then nr is not used and may be any number
+	static num_type tonelli_shanks_algo(num_type p, num_type nr, num_type a) {
+		assert(p > 2);
+		assert(a > 0);
+		assert(legendre_symbol(p, a) == 1);
+		
+		num_type q = p - 1;
+		pow_count_type m = 0;
+		while (!(q & 1)) {
+			q >>= 1;
+			++m;
+		}
+		
+		if (m == 1) {
+			assert((p+1) % 4 == 0);
+			return pow_mod_type::pow_mod(p, a, (p+1)>>2);
+		}
+		assert(nr > 1);
+		assert(legendre_symbol(p, nr) == -1);
+		
+		num_type r = pow_mod_type::pow_mod(p, a, (q+1)>>1);
+		num_type t = pow_mod_type::pow_mod(p, a, q);
+		num_type c = pow_mod_type::pow_mod(p, nr, q);
+		while (t != 1) {
+			pow_count_type i = 0;
+			num_type tpow = t;
+			do {
+				tpow = square_mod(p, tpow);
+				++i;
+			} while (tpow != 1);
+			assert(i < m);
+			num_type b = pow_mod_type::pow_mod(p, c, ((num_type)1)<<(m-i-1));
+			num_type bsq = square_mod(p, b);
+			r = mul_mod(p, r, b);
+			t = mul_mod(p, t, bsq);
+			c = bsq;
+			m = i;
+		}
+		return r;
+	}
+	
+	// solve x^2 = a (mod p)
+	// p - prime
+	// nr - quadratic nonresidue for p (used only if a is residue and p != 4k+3)
+	// if a is not quadratic residue returns 0
+	// else returns any (of two) square root
+	static num_type square_root_mod(num_type p, num_type nr, num_type a) {
+		if (pow_mod_type::pow_mod(p, a, (p-1)>>1) != 1) return 0;
+		if (p == 2) return 1;
+		return tonelli_shanks_algo(p, nr, a);
 	}
 };
 
