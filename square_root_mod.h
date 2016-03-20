@@ -9,6 +9,7 @@ template <typename NUM_TYPE, uint_fast8_t NUM_TYPE_LEN, typename OPERATION_TYPE>
 class SquareRootMod {
 public:
 	typedef NUM_TYPE num_type;
+	static_assert(NUM_TYPE_LEN > 0, "NUM_TYPE_LEN can't be zero");
 	static_assert(sizeof(num_type) <= 32, "NUM_TYPE is too big for NUM_TYPE_LEN");
 	typedef MulMod<num_type, ((num_type)1)<<(NUM_TYPE_LEN-1), OPERATION_TYPE> mul_mod_type;
 private:
