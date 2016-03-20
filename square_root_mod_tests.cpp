@@ -55,7 +55,7 @@ void test_square_root_mod_algo_01() {
 			if (r == 0) {
 				++nr_count;
 			} else {
-				assert(srm_type::square_mod(p, r) == a);
+				assert(srm_type::mul_mod_type::square_mod(p, r) == a);
 				++r_count;
 			}
 		}
@@ -85,7 +85,7 @@ void test_tonelli_shanks_algo() {
 		for (num_type a=1; a<p; ++a) {
 			if (srm_type::legendre_symbol(p, a) != 1) {++nr_count; continue;}
 			num_type r = srm_type::tonelli_shanks_algo(p, nr, a);
-			assert(srm_type::square_mod(p, r) == a);
+			assert(srm_type::mul_mod_type::square_mod(p, r) == a);
 			++r_count;
 		}
 		assert(r_count == nr_count);
@@ -121,7 +121,7 @@ void test_tonelli_shanks_algo_02_rand() {
 				num_type a = rand() % p;
 				if (srm_type::legendre_symbol(p, a) != 1) continue;
 				num_type r = srm_type::tonelli_shanks_algo(p, nr, a);
-				assert(srm_type::square_mod(p, r) == a);
+				assert(srm_type::mul_mod_type::square_mod(p, r) == a);
 			}
 		}
 		if (p == UINT32_MAX) break;
