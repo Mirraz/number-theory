@@ -33,7 +33,7 @@ primitive_roots_tests: $(BUILD_DIR)/primitive_roots_tests.o
 	$(LD) -o $@ $^ $(LDFLAGS)
 	$(STRIP) $@
 
-$(BUILD_DIR)/primitive_roots_tests.o: $(SRC_DIR)/primitive_roots_tests.cpp $(SRC_DIR)/primitive_roots.h $(SRC_DIR)/canonic_factors.h $(SRC_DIR)/factorize.h $(SRC_DIR)/mul_mod.h Makefile
+$(BUILD_DIR)/primitive_roots_tests.o: $(SRC_DIR)/primitive_roots_tests.cpp $(SRC_DIR)/primitive_roots.h $(SRC_DIR)/canonic_factors.h $(SRC_DIR)/factorize.h $(SRC_DIR)/mul_mod.h $(SRC_DIR)/mul_group_mod_tests.cpp $(SRC_DIR)/mul_group_mod.h Makefile
 	$(CC) -o $@ $< -c $(CFLAGS)
 
 canonic_factors_tests: $(BUILD_DIR)/canonic_factors_tests.o
