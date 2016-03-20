@@ -4,14 +4,14 @@
 #include <assert.h>
 #include <stdint.h>
 #include "canonic_factors.h"
-#include "pow_mod.h"
+#include "mul_mod.h"
 
 template <typename NUM_TYPE, uint_fast8_t MAX_POW_COUNT, NUM_TYPE NUM_TYPE_MAX_MASK, typename OPERATION_TYPE>
 class PrimitiveRoots {
 public:
 	typedef NUM_TYPE num_type;
 private:
-	typedef PowMod<num_type, NUM_TYPE_MAX_MASK, OPERATION_TYPE> pow_mod_type;
+	typedef MulMod<num_type, NUM_TYPE_MAX_MASK, OPERATION_TYPE> mul_mod_type;
 	typedef CanonicFactors<num_type, MAX_POW_COUNT> canonic_factors_type;
 	typedef typename canonic_factors_type::pow_count_type pow_count_type;
 	typedef typename canonic_factors_type::PrimePow prime_pow_type;
@@ -50,9 +50,9 @@ public:
 	
 	// gcd(modulo, root) == 1
 	bool is_primitive_root(num_type root) const {
-		assert(pow_mod_type::pow_mod(modulo, root, modulo-1) == 1);
+		assert(mul_mod_type::pow_mod(modulo, root, modulo-1) == 1);
 		for (pow_count_type i=0; i<exps_count; ++i) {
-			num_type pow = pow_mod_type::pow_mod(modulo, root, exps[i]);
+			num_type pow = mul_mod_type::pow_mod(modulo, root, exps[i]);
 			if (pow == 1) return false;
 		}
 		return true;

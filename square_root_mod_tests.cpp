@@ -5,14 +5,14 @@
 #include <sys/time.h>
 #include "square_root_mod.h"
 #include "factorize.h"
-#include "pow_mod.h"
+#include "mul_mod.h"
 
 uint_fast32_t my_min_nonresidue(uint_fast32_t primes[], size_t primes_count, uint_fast32_t p) {
 	assert(p > 2);
-	typedef PowMod<uint_fast32_t,((uint_fast32_t)1 << 31), uint_fast64_t> pow_mod_type;
+	typedef MulMod<uint_fast32_t,((uint_fast32_t)1 << 31), uint_fast64_t> mul_mod_type;
 	for (size_t i=0; i < primes_count; ++i) {
 		uint_fast32_t nr = primes[i];
-		if (pow_mod_type::pow_mod(p, nr, (p-1)/2) == p-1) return nr;
+		if (mul_mod_type::pow_mod(p, nr, (p-1)/2) == p-1) return nr;
 	}
 	assert(0);
 	return 0;
