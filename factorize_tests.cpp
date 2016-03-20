@@ -180,12 +180,31 @@ void test_factorize_with_primes_array() {
 	}
 }
 
+void test_prime_checke() {
+	typedef PrimeChecker<uint_fast64_t> prime_checker_type;
+	// pi(2^16) = 6542
+	prime_checker_type::num_type primes[6542];
+	size_t primes_count = prime_checker_type::primes_array_type::fill_primes(primes, 6542, 65536);
+	assert(primes_count == 6542);
+	prime_checker_type::primes_array_type primes_array(primes, primes_count);
+	prime_checker_type prime_checker(primes_array);
+	
+	size_t idx = 0;
+	for (prime_checker_type::num_type i=2; i<65536; ++i) {
+		bool my_is_prime = (idx < primes_count && i == primes[idx]);
+		if (my_is_prime) ++idx;
+		bool is_prime = prime_checker.is_prime(i);
+		assert(is_prime == my_is_prime);
+	}
+}
+
 void tests_suite() {
 	test_round_sqrt();
 	test_factorize();
 	test_sum_of_two_squares();
 	test_fill_primes();
 	test_factorize_with_primes_array();
+	test_prime_checke();
 }
 
 int main() {

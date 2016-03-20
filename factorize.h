@@ -144,6 +144,52 @@ public:
 	}
 };
 
+template< typename NUM_TYPE>
+class PrimeChecker {
+public:
+	typedef NUM_TYPE num_type;
+private:
+	typedef Factorizer<num_type> factorizer_type;
+public:
+	typedef typename factorizer_type::primes_array_type primes_array_type;
+	
+private:
+	factorizer_type factorizer;
+	num_type m_n;
+	bool result;
+	
+	PrimeChecker() = delete;
+	PrimeChecker(const PrimeChecker &b) = delete;
+	PrimeChecker& operator=(const PrimeChecker &b) = delete;
+	
+public:
+	PrimeChecker(primes_array_type b_primes_array) :
+		factorizer(
+			b_primes_array,
+			std::bind(
+				&PrimeChecker::factorize_cb,
+				this,
+				std::placeholders::_1,
+				std::placeholders::_2
+			)
+		) {}
+	
+private:
+	bool factorize_cb(typename factorizer_type::num_type prime, typename factorizer_type::exp_type exp) {
+			(void)exp;
+			result = (prime == m_n);
+			return true;
+	}
+	
+public:
+	bool is_prime(num_type n) {
+		assert(n > 1);
+		m_n = n;
+		factorizer.factorize(n);
+		return result;
+	}
+};
+
 template <typename NUM_TYPE>
 class SumOfTwoSquaresChecker {
 public:
