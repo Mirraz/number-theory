@@ -18,7 +18,7 @@ LDFLAGS=$(WARNINGS) $(DEBUG) $(LDOPTIM) $(LIBFILES)
 SRC_DIR=.
 BUILD_DIR=build
 
-ALL_TESTS=factorize_tests primitive_roots_tests canonic_factors_tests mul_group_mod_tests
+ALL_TESTS=factorize_tests primitive_roots_tests canonic_factors_tests mul_group_mod_tests square_root_mod_tests
 
 tests: $(ALL_TESTS)
 
