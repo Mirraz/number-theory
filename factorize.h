@@ -202,6 +202,7 @@ public:
 private:
 	factorizer_type factorizer;
 	num_type count;
+	
 	DivisorsCounter() = delete;
 	DivisorsCounter(const DivisorsCounter &b) = delete;
 	DivisorsCounter& operator=(const DivisorsCounter &b) = delete;
