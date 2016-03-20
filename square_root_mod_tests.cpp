@@ -20,7 +20,7 @@ uint_fast32_t my_min_nonresidue(uint_fast32_t primes[], size_t primes_count, uin
 
 void test_least_nonresidue() {
 	typedef uint_fast32_t num_type;
-	typedef SquareRootMod<num_type, ((num_type)1)<<31, uint_fast64_t> srm_type;
+	typedef SquareRootMod<num_type, 32, uint_fast64_t> srm_type;
 	typedef PrimesArray<num_type> primes_array_type;
 	num_type primes[65536];
 	size_t primes_count = primes_array_type::fill_primes(primes, 65536, UINT32_MAX);
@@ -37,7 +37,7 @@ void test_least_nonresidue() {
 
 void test_square_root_mod_algo_01() {
 	typedef uint_fast32_t num_type;
-	typedef SquareRootMod<num_type, ((num_type)1)<<31, uint_fast64_t> srm_type;
+	typedef SquareRootMod<num_type, 32, uint_fast64_t> srm_type;
 	typedef PrimesArray<num_type> primes_array_type;
 	num_type primes[1024];
 	size_t primes_count = primes_array_type::fill_primes(primes, 1024, UINT32_MAX);
@@ -66,7 +66,7 @@ void test_square_root_mod_algo_01() {
 
 void test_tonelli_shanks_algo() {
 	typedef uint_fast32_t num_type;
-	typedef SquareRootMod<num_type, ((num_type)1)<<31, uint_fast64_t> srm_type;
+	typedef SquareRootMod<num_type, 32, uint_fast64_t> srm_type;
 	typedef PrimesArray<num_type> primes_array_type;
 	num_type primes[1024];
 	size_t primes_count = primes_array_type::fill_primes(primes, 1024, UINT32_MAX);
@@ -74,17 +74,11 @@ void test_tonelli_shanks_algo() {
 	
 	for (size_t idx=1; idx<primes_count; ++idx) {
 		num_type p = primes[idx];
-		num_type nr;
-		if ((p & 3) == 3) {
-			nr = 0;
-		} else {
-			nr = srm_type::least_nonresidue(primes, primes_count, p);
-			assert(nr != 0);
-		}
+		srm_type square_root_mod(p, primes, primes_count);
 		num_type r_count = 0, nr_count = 0;
 		for (num_type a=1; a<p; ++a) {
-			if (srm_type::legendre_symbol(p, a) != 1) {++nr_count; continue;}
-			num_type r = srm_type::tonelli_shanks_algo(p, nr, a);
+			if (square_root_mod.legendre_symbol(a) != 1) {++nr_count; continue;}
+			num_type r = square_root_mod.tonelli_shanks_algo(a);
 			assert(srm_type::mul_mod_type::square_mod(p, r) == a);
 			++r_count;
 		}
@@ -101,7 +95,7 @@ void test_tonelli_shanks_algo_02_rand() {
 	srand(seed);
 
 	typedef uint_fast32_t num_type;
-	typedef SquareRootMod<num_type, ((num_type)1)<<31, uint_fast64_t> srm_type;
+	typedef SquareRootMod<num_type, 32, uint_fast64_t> srm_type;
 	typedef PrimesArray<num_type> primes_array_type;
 	num_type primes[1024];
 	size_t primes_count = primes_array_type::fill_primes(primes, 1024, UINT32_MAX);
@@ -110,17 +104,11 @@ void test_tonelli_shanks_algo_02_rand() {
 	
 	for (num_type p = UINT32_MAX-1024*4;; p+=2) {
 		if (prime_checker.is_prime(p)) {
-			num_type nr;
-			if ((p & 3) == 3) {
-				nr = 0;
-			} else {
-				nr = srm_type::least_nonresidue(primes, primes_count, p);
-				assert(nr != 0);
-			}
+			srm_type square_root_mod(p, primes, primes_count);
 			for (uint_fast16_t i=0; i<1024*4; ++i) {
 				num_type a = rand() % p;
-				if (srm_type::legendre_symbol(p, a) != 1) continue;
-				num_type r = srm_type::tonelli_shanks_algo(p, nr, a);
+				if (square_root_mod.legendre_symbol(a) != 1) continue;
+				num_type r = square_root_mod.tonelli_shanks_algo(a);
 				assert(srm_type::mul_mod_type::square_mod(p, r) == a);
 			}
 		}
@@ -131,7 +119,7 @@ void test_tonelli_shanks_algo_02_rand() {
 void tests_suite() {
 	//test_least_nonresidue();
 	//test_square_root_mod_algo_01();
-	//test_tonelli_shanks_algo();
+	test_tonelli_shanks_algo();
 	test_tonelli_shanks_algo_02_rand();
 }
 
