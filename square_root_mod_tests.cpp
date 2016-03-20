@@ -1,6 +1,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <sys/time.h>
 #include "square_root_mod.h"
 #include "factorize.h"
 #include "pow_mod.h"
@@ -91,10 +93,46 @@ void test_tonelli_shanks_algo() {
 	}
 }
 
+void test_tonelli_shanks_algo_02_rand() {
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	unsigned int seed = (unsigned int)tv.tv_sec * 1000000 + tv.tv_usec;
+	fprintf(stderr, "seed = %u\n", seed);
+	srand(seed);
+
+	typedef uint_fast32_t num_type;
+	typedef SquareRootMod<num_type, ((num_type)1)<<31, uint_fast64_t> srm_type;
+	typedef PrimesArray<num_type> primes_array_type;
+	num_type primes[1024];
+	size_t primes_count = primes_array_type::fill_primes(primes, 1024, UINT32_MAX);
+	assert(primes_count == 1024);
+	PrimeChecker<num_type> prime_checker(primes_array_type(primes, primes_count));
+	
+	for (num_type p = UINT32_MAX-1024*4;; p+=2) {
+		if (prime_checker.is_prime(p)) {
+			num_type nr;
+			if ((p & 3) == 3) {
+				nr = 0;
+			} else {
+				nr = srm_type::least_nonresidue(primes, primes_count, p);
+				assert(nr != 0);
+			}
+			for (uint_fast16_t i=0; i<1024*4; ++i) {
+				num_type a = rand() % p;
+				if (srm_type::legendre_symbol(p, a) != 1) continue;
+				num_type r = srm_type::tonelli_shanks_algo(p, nr, a);
+				assert(srm_type::square_mod(p, r) == a);
+			}
+		}
+		if (p == UINT32_MAX) break;
+	}
+}
+
 void tests_suite() {
 	//test_least_nonresidue();
 	//test_square_root_mod_algo_01();
-	test_tonelli_shanks_algo();
+	//test_tonelli_shanks_algo();
+	test_tonelli_shanks_algo_02_rand();
 }
 
 int main() {
