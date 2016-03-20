@@ -5,6 +5,14 @@
 #include <math.h>
 #include "primitive_roots.h"
 
+#define main HIDE_main
+#define tests_suite HIDE_tests_suite
+#define test_max_primitive_root HIDE_test_max_primitive_root
+#include "mul_group_mod_tests.cpp"
+#undef main
+#undef tests_suite
+#undef test_max_primitive_root
+
 void test_is_primitive_root() {
 	// primorial(9) <= 2^32-1 < primorial(10)
 	typedef PrimitiveRoots<uint_fast32_t, 9, ((uint_fast32_t)1)<<31, uint_fast64_t> prrs_type;
@@ -38,106 +46,6 @@ void test_is_primitive_root() {
 		printf("%" PRIuFAST64 "\t %" PRIuFAST64 "\n", modulo, min_root);
 		printf("%" PRIuFAST64 "\t-%" PRIuFAST64 "\n", modulo, modulo-max_root);
 		printf("\n");
-	}
-}
-
-// all primes less 65536
-#define myprimes_size 6542
-uint_fast16_t myprimes[myprimes_size];
-uint_fast8_t max_roots[myprimes_size];
-
-void fill_myprimes() {
-	uint_fast16_t n = 2;
-	uint_fast16_t count = 0;
-	while (true) {
-		uint_fast16_t n_sqrt = round(sqrt(n));
-		uint_fast16_t d;
-		for (d=2; d<=n_sqrt; d+=2) {
-			if (n % d == 0) break;
-			if (d == 2) --d;
-		}
-		if (d > n_sqrt) {
-			// n is prime
-			myprimes[count++] = n;
-		}
-		if (n == 65535) break;
-		++n;
-	}
-	assert(count == myprimes_size);
-}
-
-// primorial(6) <= 65536 < primorial(7)
-#define MAX_PRIME_DIVS 6
-
-uint_fast8_t get_prime_divs(uint_fast16_t n, uint_fast16_t prime_divs[]) {
-	uint_fast8_t count = 0;
-	uint_fast16_t n_sqrt = round(sqrt(n));
-	for (uint_fast8_t d_idx = 0; myprimes[d_idx] <= n_sqrt; ++d_idx) {
-		uint_fast16_t d = myprimes[d_idx];
-		if (n % d == 0) {
-			assert(count < MAX_PRIME_DIVS);
-			prime_divs[count++] = d;
-			do {
-				n /= d;
-			} while (n % d == 0);
-		}
-		n_sqrt = round(sqrt(n));
-	}
-	if (n > 1) {
-		assert(count < MAX_PRIME_DIVS);
-		prime_divs[count++] = n;
-	}
-	return count;
-}
-
-uint_fast16_t pow_mod(uint_fast16_t mod, uint_fast16_t base, uint_fast16_t exp) {
-	assert(mod > 1);
-	assert(base > 0 || exp > 0);
-	uint_fast32_t base_op = base, mod_op = mod, result = 1;
-	uint_fast16_t mask = (uint_fast16_t)1 << 15;
-	while (mask != 0 && !(exp & mask)) mask >>= 1;
-	while (mask > 0) {
-		result = (result * result) % mod_op;
-		if (exp & mask) {
-			result = (result * base_op) % mod_op;
-		}
-		mask >>= 1;
-	}
-	return result;
-}
-
-// max_roots[idx] = myprimes[idx] - (max primitive root modulo myprimes[idx])
-void fill_max_roots() {
-	max_roots[0] = 2 - 1; // for n = 2
-	max_roots[1] = 3 - 2; // for n = 3
-
-	// starting from 5
-	for (uint_fast16_t n_idx = 2; n_idx<myprimes_size; ++n_idx) {
-		uint_fast16_t n = myprimes[n_idx];
-		uint_fast16_t n_1 = n - 1;
-		// calculate prime divs of n-1
-		uint_fast16_t prime_divs[MAX_PRIME_DIVS];
-		uint_fast8_t prime_divs_count = get_prime_divs(n_1, prime_divs);
-		uint_fast16_t exps[MAX_PRIME_DIVS];
-		uint_fast8_t exp_count = prime_divs_count;
-		for (uint_fast8_t i=0; i<prime_divs_count; ++i) {
-			assert(n_1 > prime_divs[i]);
-			assert(n_1 % prime_divs[i] == 0);
-			exps[prime_divs_count-i-1] = n_1 / prime_divs[i];
-		}
-		
-		uint_fast16_t root;
-		for (root = n - 2; root > 1; --root) {
-			uint_fast8_t i;
-			for (i=0; i<exp_count; ++i) {
-				uint_fast16_t pow = pow_mod(n, root, exps[i]);
-				if (pow == 1) break;
-			}
-			if (i == exp_count) break;
-		}
-		assert(root > 1);
-		assert(n - root < 256);
-		max_roots[n_idx] = n - root;
 	}
 }
 
