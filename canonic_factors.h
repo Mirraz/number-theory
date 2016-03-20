@@ -44,8 +44,8 @@ public:
 	
 private:
 	factorizer_type factorizer;
-	pow_count_type pow_count;
 	PrimePow pows[MAX_POW_COUNT];
+	pow_count_type pow_count;
 	
 	bool factorize_cb(typename factorizer_type::num_type prime, typename factorizer_type::exp_type exp) {
 		assert(pow_count < MAX_POW_COUNT);

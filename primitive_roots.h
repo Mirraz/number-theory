@@ -19,8 +19,8 @@ public:
 	typedef typename canonic_factors_type::primes_array_type primes_array_type;
 	
 private:
-	num_type modulo;
 	num_type exps[MAX_POW_COUNT];
+	num_type modulo;
 	pow_count_type exps_count;
 	
 	PrimitiveRoots() = delete;

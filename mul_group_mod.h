@@ -19,15 +19,15 @@ public:
 	typedef typename canonic_factors_type::primes_array_type primes_array_type;
 	
 private:
-	num_type modulo;
 	canonic_factors_type group_exponent;
+	num_type modulo;
 	
 	MulGroupMod() = delete;
 	MulGroupMod(const MulGroupMod &b) = delete;
 	MulGroupMod& operator=(const MulGroupMod &b) = delete;
 	
 public:
-	MulGroupMod(primes_array_type primes_array) : modulo(0), group_exponent(primes_array) {}
+	MulGroupMod(primes_array_type primes_array) : group_exponent(primes_array), modulo(0) {}
 	
 	MulGroupMod(primes_array_type primes_array, num_type b_modulo) : MulGroupMod(primes_array) {
 		assign(b_modulo);
