@@ -51,7 +51,6 @@ private:
 	PrimePow *m_pows;
 	pow_count_type pow_count;
 	
-	CanonicFactorizer() = delete;
 	CanonicFactorizer(const CanonicFactorizer &b) = delete;
 	CanonicFactorizer& operator=(const CanonicFactorizer &b) = delete;
 
@@ -66,6 +65,8 @@ public:
 				std::placeholders::_2
 			)
 		) {}
+	
+	CanonicFactorizer() : CanonicFactorizer(primes_array_type()) {}
 
 private:
 	bool factorize_cb(typename factorizer_type::num_type prime, typename factorizer_type::exp_type exp) {

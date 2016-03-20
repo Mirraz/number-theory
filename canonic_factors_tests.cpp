@@ -7,8 +7,7 @@
 void test_constructor_and_value() {
 	typedef uint_fast64_t num_type;
 	typedef CanonicFactorsTemplate<num_type, 15> cft_type;
-	cft_type::CanonicFactorizer::primes_array_type primes_array;
-	cft_type::CanonicFactorizer cfzr(primes_array);
+	cft_type::CanonicFactorizer cfzr;
 	cft_type::CanonicFactors a(cfzr);
 	num_type i, j;
 	for (i=1; i<=1024+1; ++i) {
@@ -27,8 +26,7 @@ void test_constructor_and_value() {
 void test_mul() {
 	typedef uint_fast64_t num_type;
 	typedef CanonicFactorsTemplate<num_type, 15> cft_type;
-	cft_type::CanonicFactorizer::primes_array_type primes_array;
-	cft_type::CanonicFactorizer cfzr(primes_array);
+	cft_type::CanonicFactorizer cfzr;
 	cft_type::CanonicFactors a(cfzr), b(cfzr), c(cfzr), d(cfzr);
 	num_type i, j, k, l;
 	for (i=1; i<=1024+1; ++i) {
@@ -63,8 +61,7 @@ uint_fast64_t phi(uint_fast64_t n) {
 void test_eulers_phi() {
 	typedef uint_fast64_t num_type;
 	typedef CanonicFactorsTemplate<num_type, 15> cft_type;
-	cft_type::CanonicFactorizer::primes_array_type primes_array;
-	cft_type::CanonicFactorizer cfzr(primes_array);
+	cft_type::CanonicFactorizer cfzr;
 	typedef cft_type::CanonicFactors cf_type;
 	cf_type a(cfzr), b(cfzr);
 	unsigned int i, j;
@@ -115,8 +112,7 @@ uint_fast64_t phi_div_carmichael[] = {
 void test_carmichael() {
 	typedef uint_fast64_t num_type;
 	typedef CanonicFactorsTemplate<num_type, 15> cft_type;
-	cft_type::CanonicFactorizer::primes_array_type primes_array;
-	cft_type::CanonicFactorizer cfzr(primes_array);
+	cft_type::CanonicFactorizer cfzr;
 	typedef cft_type::CanonicFactors cf_type;
 	cf_type a(cfzr), b(cfzr), c(cfzr);
 	unsigned int i, j, k;
@@ -134,12 +130,13 @@ void test_carmichael() {
 void test_carmichael_02() {
 	typedef uint_fast64_t num_type;
 	typedef CanonicFactorsTemplate<num_type, 15> cft_type;
+	
 	typedef cft_type::CanonicFactorizer::primes_array_type primes_array_type;
 	num_type primes[65536];
 	size_t primes_count = primes_array_type::fill_primes(primes, 65536, UINT64_MAX);
 	assert(primes_count == 65536);
-	primes_array_type primes_array(primes, primes_count);
-	cft_type::CanonicFactorizer cfzr(primes_array);
+	cft_type::CanonicFactorizer cfzr(primes_array_type(primes, primes_count));
+	
 	typedef cft_type::CanonicFactors cf_type;
 	for (size_t idx=0; idx<primes_count; ++idx) {
 		num_type p = primes[idx];
