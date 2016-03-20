@@ -57,6 +57,12 @@ mul_group_mod_tests: $(BUILD_DIR)/mul_group_mod_tests.o
 $(BUILD_DIR)/mul_group_mod_tests.o: $(SRC_DIR)/mul_group_mod_tests.cpp $(SRC_DIR)/mul_group_mod.h $(SRC_DIR)/canonic_factors.h $(SRC_DIR)/factorize.h $(SRC_DIR)/pow_mod.h Makefile
 	$(CC) -o $@ $< -c $(CFLAGS)
 
+square_root_mod_tests: $(BUILD_DIR)/square_root_mod_tests.o
+	$(LD) -o $@ $^ $(LDFLAGS)
+	$(STRIP) $@
+
+$(BUILD_DIR)/square_root_mod_tests.o: $(SRC_DIR)/square_root_mod_tests.cpp $(SRC_DIR)/square_root_mod.h $(SRC_DIR)/factorize.h $(SRC_DIR)/pow_mod.h Makefile
+	$(CC) -o $@ $< -c $(CFLAGS)
 
 clean_tests:
 	rm $(ALL_TESTS)
