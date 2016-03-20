@@ -5,10 +5,12 @@
 #include "canonic_factors.h"
 
 void test_constructor_and_value() {
-	typedef CanonicFactors<uint_fast64_t, 15> canonic_factors_type;
-	canonic_factors_type::primes_array_type primes_array;
-	canonic_factors_type a(primes_array);
-	canonic_factors_type::num_type i, j;
+	typedef uint_fast64_t num_type;
+	typedef CanonicFactorsTemplate<num_type, 15> cft_type;
+	cft_type::CanonicFactorizer::primes_array_type primes_array;
+	cft_type::CanonicFactorizer cfzr(primes_array);
+	cft_type::CanonicFactors a(cfzr);
+	num_type i, j;
 	for (i=1; i<=1024+1; ++i) {
 		a.assign(i);
 		//printf("%u = ", i); a.dump(); printf("\n");
@@ -23,10 +25,12 @@ void test_constructor_and_value() {
 }
 
 void test_mul() {
-	typedef CanonicFactors<uint_fast64_t, 15> canonic_factors_type;
-	canonic_factors_type::primes_array_type primes_array;
-	canonic_factors_type a(primes_array), b(primes_array), c(primes_array), d(primes_array);
-	canonic_factors_type::num_type i, j, k, l;
+	typedef uint_fast64_t num_type;
+	typedef CanonicFactorsTemplate<num_type, 15> cft_type;
+	cft_type::CanonicFactorizer::primes_array_type primes_array;
+	cft_type::CanonicFactorizer cfzr(primes_array);
+	cft_type::CanonicFactors a(cfzr), b(cfzr), c(cfzr), d(cfzr);
+	num_type i, j, k, l;
 	for (i=1; i<=1024+1; ++i) {
 		for (j=1; j<=1024+1; ++j) {
 			a.assign(i);
@@ -57,13 +61,16 @@ uint_fast64_t phi(uint_fast64_t n) {
 }
 
 void test_eulers_phi() {
-	typedef CanonicFactors<uint_fast64_t, 15> canonic_factors_type;
-	canonic_factors_type::primes_array_type primes_array;
-	canonic_factors_type a(primes_array), b(primes_array);
+	typedef uint_fast64_t num_type;
+	typedef CanonicFactorsTemplate<num_type, 15> cft_type;
+	cft_type::CanonicFactorizer::primes_array_type primes_array;
+	cft_type::CanonicFactorizer cfzr(primes_array);
+	typedef cft_type::CanonicFactors cf_type;
+	cf_type a(cfzr), b(cfzr);
 	unsigned int i, j;
 	for (i=1; i<=1024*2+1; ++i) {
 		a.assign(i);
-		b = canonic_factors_type::eulers_phi(a);
+		b = cf_type::eulers_phi(a);
 		j = b.value();
 		assert(j == phi(i));
 	}
@@ -106,14 +113,17 @@ uint_fast64_t phi_div_carmichael[] = {
 };
 
 void test_carmichael() {
-	typedef CanonicFactors<uint_fast64_t, 15> canonic_factors_type;
-	canonic_factors_type::primes_array_type primes_array;
-	canonic_factors_type a(primes_array), b(primes_array), c(primes_array);
+	typedef uint_fast64_t num_type;
+	typedef CanonicFactorsTemplate<num_type, 15> cft_type;
+	cft_type::CanonicFactorizer::primes_array_type primes_array;
+	cft_type::CanonicFactorizer cfzr(primes_array);
+	typedef cft_type::CanonicFactors cf_type;
+	cf_type a(cfzr), b(cfzr), c(cfzr);
 	unsigned int i, j, k;
 	for (i=1; i<sizeof(phi_div_carmichael)/sizeof(phi_div_carmichael[0]); ++i) {
 		a.assign(i);
-		b = canonic_factors_type::carmichael(a);
-		c = canonic_factors_type::eulers_phi(a);
+		b = cf_type::carmichael(a);
+		c = cf_type::eulers_phi(a);
 		j = b.value();
 		k = c.value();
 		assert(k % j == 0);
@@ -122,15 +132,20 @@ void test_carmichael() {
 }
 
 void test_carmichael_02() {
-	typedef CanonicFactors<uint_fast64_t, 15> cf_type;
-	cf_type::num_type primes[65536];
-	size_t primes_count = cf_type::primes_array_type::fill_primes(primes, 65536, UINT64_MAX);
-	cf_type::primes_array_type primes_array(primes, primes_count);
+	typedef uint_fast64_t num_type;
+	typedef CanonicFactorsTemplate<num_type, 15> cft_type;
+	typedef cft_type::CanonicFactorizer::primes_array_type primes_array_type;
+	num_type primes[65536];
+	size_t primes_count = primes_array_type::fill_primes(primes, 65536, UINT64_MAX);
+	assert(primes_count == 65536);
+	primes_array_type primes_array(primes, primes_count);
+	cft_type::CanonicFactorizer cfzr(primes_array);
+	typedef cft_type::CanonicFactors cf_type;
 	for (size_t idx=0; idx<primes_count; ++idx) {
-		cf_type::num_type p = primes[idx];
-		cf_type cf_p(primes_array, p);
-		cf_type::num_type eulers_phi = cf_type::eulers_phi(cf_p).value();
-		cf_type::num_type carmichael = cf_type::carmichael(cf_p).value();
+		num_type p = primes[idx];
+		cf_type cf_p(cfzr, p);
+		num_type eulers_phi = cf_type::eulers_phi(cf_p).value();
+		num_type carmichael = cf_type::carmichael(cf_p).value();
 		assert(eulers_phi == carmichael);
 		assert(eulers_phi == p - 1);
 	}

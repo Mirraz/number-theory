@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <stdint.h>
+#include <stddef.h>		// NULL
 #ifndef NDEBUG
 #  include <stdio.h>
 #endif
@@ -16,7 +17,7 @@
 // primorial(15) < 2^64 < primorial(16)
 
 template<typename NUM_TYPE, uint_fast8_t MAX_POW_COUNT>
-class CanonicFactors {
+class CanonicFactorsTemplate {
 public:
 	typedef NUM_TYPE num_type;
 	static_assert(sizeof(num_type) <= 32, "Too big num_type for exp_type");
@@ -27,68 +28,83 @@ public:
 	static_assert(sizeof(num_type) <= 286, "Too big num_type for pow_count_type");
 	typedef uint_fast8_t pow_count_type;
 	static_assert(MAX_POW_COUNT > 0, "MAX_POW_COUNT can't be zero");
+
+
+struct PrimePow {
+	num_type prime;
+	exp_type exp;
 	
+	PrimePow() : prime(0), exp(0) {}
+	PrimePow(num_type b_prime, exp_type b_exp) : prime(b_prime), exp(b_exp) {}
+	PrimePow(const PrimePow &b) : prime(b.prime), exp(b.exp) {}
+};
+
+
+class CanonicFactorizer {
 private:
 	typedef Factorizer<num_type> factorizer_type;
 public:
 	typedef typename factorizer_type::primes_array_type primes_array_type;
-	
-	struct PrimePow {
-		num_type prime;
-		exp_type exp;
-		
-		PrimePow() : prime(0), exp(0) {}
-		PrimePow(num_type b_prime, exp_type b_exp) : prime(b_prime), exp(b_exp) {}
-		PrimePow(const PrimePow &b) : prime(b.prime), exp(b.exp) {}
-	};
-	
+
 private:
 	factorizer_type factorizer;
-	PrimePow pows[MAX_POW_COUNT];
+	PrimePow *m_pows;
 	pow_count_type pow_count;
 	
-	bool factorize_cb(typename factorizer_type::num_type prime, typename factorizer_type::exp_type exp) {
-		assert(pow_count < MAX_POW_COUNT);
-		pows[pow_count++] = PrimePow(prime, exp);
-		return false;
-	}
-	
+	CanonicFactorizer() = delete;
+	CanonicFactorizer(const CanonicFactorizer &b) = delete;
+	CanonicFactorizer& operator=(const CanonicFactorizer &b) = delete;
+
 public:
-	CanonicFactors(primes_array_type primes_array) :
+	CanonicFactorizer(primes_array_type primes_array) :
 		factorizer(
 			primes_array,
 			std::bind(
-				&CanonicFactors::factorize_cb,
+				&CanonicFactorizer::factorize_cb,
 				this,
 				std::placeholders::_1,
 				std::placeholders::_2
 			)
-		),
-		pow_count(0) {}
+		) {}
+
+private:
+	bool factorize_cb(typename factorizer_type::num_type prime, typename factorizer_type::exp_type exp) {
+		assert(pow_count < MAX_POW_COUNT);
+		m_pows[pow_count++] = PrimePow(prime, exp);
+		return false;
+	}
+
+public:
+	pow_count_type factorize(num_type n, PrimePow pows[]) {
+		pow_count = 0;
+		m_pows = pows;
+		factorizer.factorize(n);
+		pows = NULL;
+		return pow_count;
+	}
+};
+
+
+class CanonicFactors {
+private:
+	PrimePow pows[MAX_POW_COUNT];
+	CanonicFactorizer &factorizer;
+	pow_count_type pow_count;
 	
-	CanonicFactors(const CanonicFactors &b) : CanonicFactors(b.factorizer.get_primes_array()) {
-		pow_count = b.pow_count;
+public:
+	CanonicFactors(CanonicFactorizer &b_factorizer) : factorizer(b_factorizer), pow_count(0) {}
+	
+	CanonicFactors(const CanonicFactors &b) : factorizer(b.factorizer), pow_count(b.pow_count) {
 		std::copy(b.pows, b.pows+b.pow_count, pows);
 	}
 	
-	CanonicFactors(CanonicFactors &&b) : CanonicFactors(b.factorizer.get_primes_array()) {
-		pow_count = b.pow_count;
+	CanonicFactors(CanonicFactors &&b) : factorizer(b.factorizer), pow_count(b.pow_count) {
 		std::copy(b.pows, b.pows+b.pow_count, pows);
-		b.factorizer = factorizer_type(primes_array_type(), typename factorizer_type::factorize_cb_type());
 		b.pow_count = 0;
 	}
 	
 private:
 	void assign(const CanonicFactors &b) {
-		factorizer = factorizer_type(
-			b.factorizer.get_primes_array(),
-			std::bind(
-				&CanonicFactors::factorize_cb,
-				this,
-				std::placeholders::_1,
-				std::placeholders::_2
-			)
-		);
 		pow_count = b.pow_count;
 		std::copy(b.pows, b.pows+b.pow_count, pows);
 	}
@@ -97,7 +113,6 @@ public:
 	CanonicFactors& operator=(CanonicFactors &&b) {
 		if (this != &b) {
 			assign(b);
-			b.factorizer = factorizer_type(primes_array_type(), typename factorizer_type::factorize_cb_type());
 			b.pow_count = 0;
 		}
 		return *this;
@@ -108,19 +123,20 @@ public:
 		return *this;
 	}
 	
-	CanonicFactors(primes_array_type primes_array, const PrimePow &b) : CanonicFactors(primes_array) {
-		pow_count = 1;
+	CanonicFactors(CanonicFactorizer &b_factorizer, const PrimePow &b) : factorizer(b_factorizer), pow_count(1) {
 		pows[0] = b;
 	}
 	
-	CanonicFactors(primes_array_type primes_array, num_type n) : CanonicFactors(primes_array) {
+	CanonicFactors(CanonicFactorizer &b_factorizer, num_type n) : factorizer(b_factorizer) {
 		assign(n);
 	}
 	
 	void assign(num_type n) {
-		pow_count = 0;
-		if (n == 1) return; // just for optimisation
-		factorizer.factorize(n);
+		if (n == 1) {		// just for optimisation
+			pow_count = 0;
+			return;
+		}
+		pow_count = factorizer.factorize(n, pows);
 	}
 	
 	// some pows[i].exp may be == 0
@@ -170,7 +186,7 @@ public:
 private:
 	// TODO maybe more optimal mul_assign_static
 	static CanonicFactors mul_static(const CanonicFactors &a, const CanonicFactors &b) {
-		CanonicFactors result(a.factorizer.get_primes_array());
+		CanonicFactors result(a.factorizer);
 		result.pow_count = 0;
 		pow_count_type i = 0, j = 0;
 		while (i < a.pow_count || j < b.pow_count) {
@@ -201,7 +217,7 @@ public:
 	}
 	
 	CanonicFactors operator*(num_type b) const {
-		return (*this) * CanonicFactors(factorizer.get_primes_array(), b);
+		return (*this) * CanonicFactors(factorizer, b);
 	}
 	
 	CanonicFactors& operator *=(const CanonicFactors &b) {
@@ -211,12 +227,12 @@ public:
 	}
 	
 	CanonicFactors& operator *=(num_type b) {
-		return (*this) *= CanonicFactors(factorizer.get_primes_array(), b);
+		return (*this) *= CanonicFactors(factorizer, b);
 	}
 	
 private:
 	static CanonicFactors mul_pow_static(const CanonicFactors &a, const PrimePow &b) {
-		CanonicFactors result(a.factorizer.get_primes_array());
+		CanonicFactors result(a.factorizer);
 		pow_count_type i;
 		for (i=0; i<a.pow_count && a.pows[i].prime < b.prime; ++i) {
 			result.pows[i] = a.pows[i];
@@ -267,7 +283,7 @@ public:
 	
 public:
 	static CanonicFactors lcm(const CanonicFactors &a, const CanonicFactors &b) {
-		CanonicFactors result(a.factorizer.get_primes_array());
+		CanonicFactors result(a.factorizer);
 		result.pow_count = 0;
 		pow_count_type i = 0, j = 0;
 		while (i < a.pow_count || j < b.pow_count) {
@@ -293,7 +309,7 @@ public:
 	}
 	
 	static CanonicFactors eulers_phi(const CanonicFactors &b) {
-		CanonicFactors result(b.factorizer.get_primes_array());
+		CanonicFactors result(b.factorizer);
 		for (pow_count_type i=0; i<b.pow_count; ++i) {
 			result *= b.pows[i].prime - 1;
 			if (b.pows[i].exp > 1) result.mul_pow_assign(PrimePow(b.pows[i].prime, b.pows[i].exp - 1));
@@ -302,25 +318,28 @@ public:
 	}
 	
 private:
-	static CanonicFactors eulers_phi_pow(primes_array_type primes_array, const PrimePow &b) {
-		CanonicFactors result(primes_array, b.prime - 1);
+	static CanonicFactors eulers_phi_pow(CanonicFactorizer &b_factorizer, const PrimePow &b) {
+		CanonicFactors result(b_factorizer, b.prime - 1);
 		if (b.exp > 1) result.mul_pow_assign(PrimePow(b.prime, b.exp - 1));
 		return result;
 	}
 	
 public:
 	static CanonicFactors carmichael(const CanonicFactors &b) {
-		if (b.pow_count == 0) return CanonicFactors(b.factorizer.get_primes_array());
+		if (b.pow_count == 0) return CanonicFactors(b.factorizer);
 		CanonicFactors result(
 			b.pows[0].prime == 2 && b.pows[0].exp > 2 ?
-			CanonicFactors(b.factorizer.get_primes_array(), PrimePow(2, b.pows[0].exp - 2)) :
-			eulers_phi_pow(b.factorizer.get_primes_array(), b.pows[0])
+			CanonicFactors(b.factorizer, PrimePow(2, b.pows[0].exp - 2)) :
+			eulers_phi_pow(b.factorizer, b.pows[0])
 		);
 		for (pow_count_type i=1; i<b.pow_count; ++i) {
-			result = lcm(result, eulers_phi_pow(b.factorizer.get_primes_array(), b.pows[i]));
+			result = lcm(result, eulers_phi_pow(b.factorizer, b.pows[i]));
 		}
 		return result;
 	}
+};
+
+
 };
 
 #endif/*CANONIC_FACTORS_H*/
