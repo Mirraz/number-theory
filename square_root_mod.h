@@ -10,8 +10,8 @@ public:
 	typedef NUM_TYPE num_type;
 	typedef MulMod<num_type, NUM_TYPE_MAX_MASK, OPERATION_TYPE> mul_mod_type;
 private:
-	static_assert(sizeof(num_type) <= 32, "NUM_TYPE is too big for pow_count_type");
-	typedef uint_fast8_t pow_count_type;
+	static_assert(sizeof(num_type) <= 32, "NUM_TYPE is too big for exp_type");
+	typedef uint_fast8_t exp_type;
 	
 public:
 	// legendre symbol (a / p)
@@ -47,7 +47,7 @@ public:
 		if (legendre_symbol(p, a) != 1) return 0;
 		
 		num_type k = p - 1;
-		pow_count_type h = 0;
+		exp_type h = 0;
 		while (!(k & 1)) {
 			k >>= 1;
 			++h;
@@ -77,7 +77,7 @@ public:
 		assert(legendre_symbol(p, a) == 1);
 		
 		num_type q = p - 1;
-		pow_count_type m = 0;
+		exp_type m = 0;
 		while (!(q & 1)) {
 			q >>= 1;
 			++m;
@@ -94,7 +94,7 @@ public:
 		num_type t = mul_mod_type::pow_mod(p, a, q);
 		num_type c = mul_mod_type::pow_mod(p, nr, q);
 		while (t != 1) {
-			pow_count_type i = 0;
+			exp_type i = 0;
 			num_type tpow = t;
 			do {
 				tpow = mul_mod_type::square_mod(p, tpow);
