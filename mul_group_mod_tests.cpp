@@ -9,10 +9,11 @@ uint_fast64_t gcd(uint_fast64_t a, uint_fast64_t b) {
 }
 
 void test_order() {
-	typedef MulGroupMod<uint_fast32_t, 9, ((uint_fast32_t)1)<<31, uint_fast64_t> mgm_type;
-	mgm_type::primes_array_type primes_array;
-	mgm_type a(primes_array);
-	mgm_type::num_type i, j, k;
+	typedef uint_fast32_t num_type;
+	typedef MulGroupMod<num_type, 9, ((num_type)1)<<31, uint_fast64_t> mgm_type;
+	mgm_type::canonic_factorizer_type cfzr;
+	mgm_type a(cfzr);
+	num_type i, j, k;
 	for (i=2; i<1024; ++i) {
 		a.assign(i);
 		for (j=0; j<i; ++j) {
@@ -127,23 +128,27 @@ void fill_max_roots() {
 void test_max_primitive_root() {
 	fill_myprimes();
 	fill_max_roots();
-
-	typedef MulGroupMod<uint_fast32_t, 9, ((uint_fast32_t)1)<<31, uint_fast64_t> mgm_type;
+	
+	typedef uint_fast32_t num_type;
+	typedef MulGroupMod<num_type, 9, ((num_type)1)<<31, uint_fast64_t> mgm_type;
+	
+	typedef mgm_type::canonic_factorizer_type cfzr_type;
+	typedef cfzr_type::primes_array_type primes_array_type;
 	// pi(2^16) = 6542
-	mgm_type::num_type primes[6542];
-	size_t primes_count = mgm_type::primes_array_type::fill_primes(
+	num_type primes[6542];
+	size_t primes_count = primes_array_type::fill_primes(
 		primes,
 		sizeof(primes) / sizeof(primes[0]),
-		(mgm_type::num_type)UINT16_MAX + 1
+		(num_type)UINT16_MAX + 1
 	);
 	assert(primes_count == sizeof(primes) / sizeof(primes[0]));
-	mgm_type::primes_array_type primes_array(primes, primes_count);
+	cfzr_type cfzr(primes_array_type(primes, primes_count));
 	
 	for (size_t idx=0; idx<sizeof(primes) / sizeof(primes[0]); ++idx) {
-		mgm_type::num_type modulo = primes[idx];
-		mgm_type mul_group_mod(primes_array, modulo);
-		mgm_type::num_type max_root = 0;
-		for (mgm_type::num_type i=modulo-1; i>=1; --i) {
+		num_type modulo = primes[idx];
+		mgm_type mul_group_mod(cfzr, modulo);
+		num_type max_root = 0;
+		for (num_type i=modulo-1; i>=1; --i) {
 			bool is_primitive_root = mul_group_mod.is_primitive_root(i);
 			if (is_primitive_root) {
 				assert(mul_group_mod.element_order(i) == modulo-1);

@@ -12,11 +12,12 @@ public:
 	typedef NUM_TYPE num_type;
 private:
 	typedef MulMod<num_type, NUM_TYPE_MAX_MASK, OPERATION_TYPE> mul_mod_type;
-	typedef CanonicFactors<num_type, MAX_POW_COUNT> canonic_factors_type;
-	typedef typename canonic_factors_type::pow_count_type pow_count_type;
-	typedef typename canonic_factors_type::PrimePow prime_pow_type;
+	typedef CanonicFactorsTemplate<num_type, MAX_POW_COUNT> cft_type;
+	typedef typename cft_type::pow_count_type pow_count_type;
+	typedef typename cft_type::PrimePow prime_pow_type;
+	typedef typename cft_type::CanonicFactors canonic_factors_type;
 public:
-	typedef typename canonic_factors_type::primes_array_type primes_array_type;
+	typedef typename cft_type::CanonicFactorizer canonic_factorizer_type;
 	
 private:
 	num_type exps[MAX_POW_COUNT];
@@ -29,7 +30,7 @@ private:
 	
 public:
 	// modulo must be prime
-	PrimitiveRoots(primes_array_type b_primes_array, num_type b_modulo) : modulo(b_modulo) {
+	PrimitiveRoots(canonic_factorizer_type &canonic_factorizer, num_type b_modulo) : modulo(b_modulo) {
 		assert(modulo >= 2);
 		if (modulo <= 3) {
 			exps_count = 0;
@@ -37,7 +38,7 @@ public:
 		}
 		
 		num_type modulo_1 = modulo - 1;
-		canonic_factors_type phi(b_primes_array, modulo_1);
+		canonic_factors_type phi(canonic_factorizer, modulo_1);
 		prime_pow_type prime_factors[MAX_POW_COUNT];
 		exps_count = phi.copy(prime_factors, MAX_POW_COUNT);
 		

@@ -14,29 +14,31 @@
 #undef test_max_primitive_root
 
 void test_is_primitive_root() {
-	// primorial(9) <= 2^32-1 < primorial(10)
-	typedef PrimitiveRoots<uint_fast32_t, 9, ((uint_fast32_t)1)<<31, uint_fast64_t> prrs_type;
+	typedef uint_fast32_t num_type;
+	typedef PrimitiveRoots<num_type, 9, ((num_type)1)<<31, uint_fast64_t> prrs_type;
 	
+	typedef prrs_type::canonic_factorizer_type cfzr_type;
+	typedef cfzr_type::primes_array_type primes_array_type;
 	// pi(2^16) = 6542
-	prrs_type::num_type primes[6542];
-	size_t primes_count = prrs_type::primes_array_type::fill_primes(
+	num_type primes[6542];
+	size_t primes_count = primes_array_type::fill_primes(
 		primes,
 		sizeof(primes) / sizeof(primes[0]),
-		(prrs_type::num_type)UINT16_MAX + 1
+		(num_type)UINT16_MAX + 1
 	);
 	assert(primes_count == sizeof(primes) / sizeof(primes[0]));
-	prrs_type::primes_array_type primes_array(primes, primes_count);
+	cfzr_type cfzr(primes_array_type(primes, primes_count));
 	
 	for (size_t idx=0; idx<sizeof(primes) / sizeof(primes[0]); ++idx) {
-		prrs_type::num_type modulo = primes[idx];
-		prrs_type primitive_roots(primes_array, modulo);
-		prrs_type::num_type min_root = 0;
-		for (prrs_type::num_type i=1; i<modulo; ++i) {
+		num_type modulo = primes[idx];
+		prrs_type primitive_roots(cfzr, modulo);
+		num_type min_root = 0;
+		for (num_type i=1; i<modulo; ++i) {
 			bool is_primitive_root = primitive_roots.is_primitive_root(i);
 			if (is_primitive_root) {min_root = i; break;}
 		}
-		prrs_type::num_type max_root = 0;
-		for (prrs_type::num_type i=modulo-1; i>=1; --i) {
+		num_type max_root = 0;
+		for (num_type i=modulo-1; i>=1; --i) {
 			bool is_primitive_root = primitive_roots.is_primitive_root(i);
 			if (is_primitive_root) {max_root = i; break;}
 		}
@@ -53,24 +55,26 @@ void test_max_primitive_root() {
 	fill_myprimes();
 	fill_max_roots();
 
-	// primorial(9) <= 2^32-1 < primorial(10)
-	typedef PrimitiveRoots<uint_fast32_t, 9, ((uint_fast32_t)1)<<31, uint_fast64_t> prrs_type;
+	typedef uint_fast32_t num_type;
+	typedef PrimitiveRoots<num_type, 9, ((num_type)1)<<31, uint_fast64_t> prrs_type;
 	
+	typedef prrs_type::canonic_factorizer_type cfzr_type;
+	typedef cfzr_type::primes_array_type primes_array_type;
 	// pi(2^16) = 6542
-	prrs_type::num_type primes[6542];
-	size_t primes_count = prrs_type::primes_array_type::fill_primes(
+	num_type primes[6542];
+	size_t primes_count = primes_array_type::fill_primes(
 		primes,
 		sizeof(primes) / sizeof(primes[0]),
-		(prrs_type::num_type)UINT16_MAX + 1
+		(num_type)UINT16_MAX + 1
 	);
 	assert(primes_count == sizeof(primes) / sizeof(primes[0]));
-	prrs_type::primes_array_type primes_array(primes, primes_count);
+	cfzr_type cfzr(primes_array_type(primes, primes_count));
 	
 	for (size_t idx=0; idx<sizeof(primes) / sizeof(primes[0]); ++idx) {
-		prrs_type::num_type modulo = primes[idx];
-		prrs_type primitive_roots(primes_array, modulo);
-		prrs_type::num_type max_root = 0;
-		for (prrs_type::num_type i=modulo-1; i>=1; --i) {
+		num_type modulo = primes[idx];
+		prrs_type primitive_roots(cfzr, modulo);
+		num_type max_root = 0;
+		for (num_type i=modulo-1; i>=1; --i) {
 			bool is_primitive_root = primitive_roots.is_primitive_root(i);
 			if (is_primitive_root) {max_root = i; break;}
 		}

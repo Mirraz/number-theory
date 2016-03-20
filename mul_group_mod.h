@@ -12,11 +12,12 @@ public:
 	typedef NUM_TYPE num_type;
 private:
 	typedef MulMod<num_type, NUM_TYPE_MAX_MASK, OPERATION_TYPE> mul_mod_type;
-	typedef CanonicFactors<num_type, MAX_POW_COUNT> canonic_factors_type;
-	typedef typename canonic_factors_type::PrimePow prime_pow_type;
-	typedef typename canonic_factors_type::pow_count_type pow_count_type;
+	typedef CanonicFactorsTemplate<num_type, MAX_POW_COUNT> cft_type;
+	typedef typename cft_type::pow_count_type pow_count_type;
+	typedef typename cft_type::PrimePow prime_pow_type;
+	typedef typename cft_type::CanonicFactors canonic_factors_type;
 public:
-	typedef typename canonic_factors_type::primes_array_type primes_array_type;
+	typedef typename cft_type::CanonicFactorizer canonic_factorizer_type;
 	
 private:
 	canonic_factors_type group_exponent;
@@ -27,9 +28,9 @@ private:
 	MulGroupMod& operator=(const MulGroupMod &b) = delete;
 	
 public:
-	MulGroupMod(primes_array_type primes_array) : group_exponent(primes_array), modulo(0) {}
+	MulGroupMod(canonic_factorizer_type &canonic_factorizer) : group_exponent(canonic_factorizer), modulo(0) {}
 	
-	MulGroupMod(primes_array_type primes_array, num_type b_modulo) : MulGroupMod(primes_array) {
+	MulGroupMod(canonic_factorizer_type &canonic_factorizer, num_type b_modulo) : MulGroupMod(canonic_factorizer) {
 		assign(b_modulo);
 	}
 	
