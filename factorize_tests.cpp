@@ -180,7 +180,7 @@ void test_factorize_with_primes_array() {
 	}
 }
 
-void test_prime_checke() {
+void test_prime_checker() {
 	typedef PrimeChecker<uint_fast64_t> prime_checker_type;
 	// pi(2^16) = 6542
 	prime_checker_type::num_type primes[6542];
@@ -204,7 +204,7 @@ void tests_suite() {
 	test_sum_of_two_squares();
 	test_fill_primes();
 	test_factorize_with_primes_array();
-	test_prime_checke();
+	test_prime_checker();
 }
 
 int main() {
