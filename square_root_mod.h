@@ -10,9 +10,9 @@ public:
 	typedef NUM_TYPE num_type;
 private:
 	typedef PowMod<num_type, NUM_TYPE_MAX_MASK, OPERATION_TYPE> pow_mod_type;
+	typedef typename pow_mod_type::operation_type operation_type;
 	
 public:
-	
 	// legendre symbol (a / p)
 	// p - odd prime
 	static int legendre_symbol(num_type p, num_type a) {
@@ -35,6 +35,43 @@ public:
 		for (size_t i=0; i < primes_count; ++i) {
 			if (legendre_symbol(p, primes[i]) == -1) return primes[i];
 		}
+		return 0;
+	}
+	
+	static num_type square_mod(num_type p, num_type a) {
+		operation_type p_op = p, a_op = a;
+		return (a_op * a_op) % p_op;
+	}
+	
+	// solve x^2 = a (mod p)
+	// p - prime
+	// nr - quadratic nonresidue for p
+	// if a is not quadratic residue returns 0
+	// else returns any (of two) square root
+	static num_type square_root_mod_algo_01(num_type p, num_type nr, num_type a) {
+		assert(p > 2);
+		assert(a > 0);
+		if (pow_mod_type::pow_mod(p, a, (p-1)>>1) != 1) return 0;
+		
+		num_type k = p - 1;
+		uint_fast8_t h = 0;
+		while (!(k & 1)) {
+			k >>= 1;
+			++h;
+		}
+		k = (k - 1) >> 1;
+		++h;
+		assert(h >= 2);
+		
+		operation_type p_op = p;
+		num_type z_count = 1 << (h-2);
+		for (num_type z=0; z<z_count; ++z) {
+			operation_type np = pow_mod_type::pow_mod(p, nr, z*(2*k+1));
+			operation_type ap = pow_mod_type::pow_mod(p, a, k+1);
+			operation_type x = (np * ap) % p_op;
+			if ((x * x) % p_op == a) return x;
+		}
+		assert(0);
 		return 0;
 	}
 };

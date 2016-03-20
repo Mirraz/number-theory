@@ -34,8 +34,39 @@ void test_least_nonresidue() {
 	}
 }
 
+void test_square_root_mod_algo_01() {
+	typedef uint_fast32_t num_type;
+	typedef SquareRootMod<num_type, ((num_type)1)<<31, uint_fast64_t> srm_type;
+	typedef PrimesArray<num_type> primes_array_type;
+	num_type primes[1024];
+	size_t primes_count = primes_array_type::fill_primes(primes, 1024, UINT32_MAX);
+	assert(primes_count == 1024);
+	
+	num_type p;
+	for (size_t idx=1; idx<primes_count; ++idx) {
+		p = primes[idx];
+		num_type nr = srm_type::least_nonresidue(primes, primes_count, p);
+		assert(nr != 0);
+		num_type r_count = 0, nr_count = 0;
+		for (num_type a=1; a<p; ++a) {
+			num_type r = srm_type::square_root_mod_algo_01(p, nr, a);
+			int legendre_symbol = srm_type::legendre_symbol(p, a);
+			assert((legendre_symbol != 1) == (r == 0));
+			if (r == 0) {
+				++nr_count;
+			} else {
+				assert(srm_type::square_mod(p, r) == a);
+				++r_count;
+			}
+		}
+		assert(r_count == nr_count);
+		assert(r_count == (p-1)/2);
+	}
+}
+
 void tests_suite() {
-	test_least_nonresidue();
+	//test_least_nonresidue();
+	test_square_root_mod_algo_01();
 }
 
 int main() {
