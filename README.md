@@ -2,8 +2,8 @@
 Template classes with Number theory algorithms implementations.
 
 **compile** all tests by `mkdir build; make`<br />
-run `make clean` for clean build dir<br />
-run `make clean_tests` for clean tests executables
+run `make clean` to clean build dir<br />
+run `make clean_tests` to clean tests executables
 
 ### factorize
 integer factorization by trial division
@@ -76,12 +76,12 @@ primitive root modulo n checker, maybe slightly more efficient then `MulGroupMod
 quadratic congruences modulo n
 
 `square_root_mod.h` - template class `SquareRootMod` for solving quadratic congruences<br />
-`square_root_mod_tests.cpp` - tests and usage examples, **compile** by `square_root_mod_tests`
+`square_root_mod_tests.cpp` - tests and usage examples, **compile** by `make square_root_mod_tests`
 
 ##### `SquareRootMod` methods:
 `SquareRootMod` - construct object from modulo n for storing and using already calculated data<br />
 `legendre_symbol` - calculate Legendre symbol by Euler's criterion (not the most efficient)<br />
 `least_nonresidue` - find Least quadratic non-residue modulo n<br />
-`tonelli_shanks_algo` - Tonelli-Shanks algorithm implementation, optimization by storing and using already calculated data<br />
+`tonelli_shanks_algo` - Tonelli-Shanks algorithm implementation, optimized by storing and using already calculated data<br />
 `square_root_mod` - wrapper for `tonelli_shanks_algo`
 
